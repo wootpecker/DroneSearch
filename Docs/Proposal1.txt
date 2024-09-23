@@ -1,0 +1,47 @@
+Bachelor Thesis Proposal
+Title: Gas Distribution Mapping Using Machine Learning for Enhanced Environmental Monitoring
+1. Introduction
+The accurate detection and mapping of gas concentrations in the atmosphere are essential for various sectors, including environmental protection, public health, and industrial safety. Gas distribution mapping (GDM) involves identifying the spatial distribution of gases such as methane (CH₄), carbon dioxide (CO₂), and volatile organic compounds (VOCs) in both natural and industrial settings. Traditional GDM methods rely heavily on sensor networks and manual data analysis, but these techniques often have limitations in terms of cost, scalability, and real-time performance.
+The recent advent of machine learning (ML) technologies presents a new opportunity to enhance GDM. By training models on large datasets collected from gas sensors and other atmospheric data sources, machine learning algorithms can improve the accuracy, speed, and predictability of gas distribution. ML techniques such as regression models, neural networks, and decision trees can optimize gas concentration predictions, detect anomalies, and potentially identify leak sources with high precision. This thesis will explore the application of machine learning algorithms in GDM to improve the accuracy and efficiency of gas mapping.
+2. Research Questions
+This proposal aims to address the following research questions:
+How can machine learning be applied to improve gas distribution mapping?
+Which machine learning algorithms provide the highest accuracy for gas concentration predictions in different environments?
+What are the advantages and limitations of using machine learning in comparison to traditional gas distribution mapping methods?
+How can real-time gas distribution data be used to optimize environmental monitoring and industrial safety?
+3. Objectives
+The main objectives of this thesis are:
+To develop a machine learning model for predicting gas distribution based on sensor data.
+To evaluate the performance of different machine learning algorithms, including support vector machines (SVM), decision trees, and neural networks, for gas concentration predictions.
+To test the developed model on real-world datasets from existing gas sensors in industrial or urban environments.
+To compare the results from machine learning methods with traditional gas distribution mapping techniques, assessing improvements in accuracy and efficiency.
+4. Literature Review
+Several studies have investigated the use of machine learning in environmental monitoring, with a focus on gas detection and distribution. For example, some research has shown that artificial neural networks (ANNs) can effectively model complex gas distributions in urban areas, outperforming classical interpolation techniques (Stojanovic et al., 2020). Moreover, unsupervised learning approaches such as clustering algorithms have been applied to identify patterns in gas emissions, which helps detect leaks or pollution hotspots (Trincavelli et al., 2011). Despite these advancements, there is still a gap in integrating real-time sensor data with machine learning models to provide continuous, high-resolution gas distribution maps.
+5. Methodology
+This project will follow a systematic methodology involving data collection, model development, and evaluation:
+Data Collection: Atmospheric gas concentration data will be collected from publicly available datasets or through simulated environments. Sensors will provide inputs on gas levels, temperature, humidity, and wind conditions, which will serve as features for the machine learning model.
+Model Development: Various machine learning algorithms (e.g., regression models, decision trees, SVM, neural networks) will be applied to the dataset to predict gas concentrations at different locations and times. Feature engineering will be used to optimize model performance.
+Evaluation: The models will be evaluated based on performance metrics such as accuracy, precision, and computational efficiency. Comparisons will be made between machine learning-based predictions and results from traditional interpolation methods, such as Kriging and inverse distance weighting (IDW).
+Testing and Validation: The model will be tested in simulated environments and real-world scenarios, such as urban pollution monitoring or industrial gas leak detection. Validation will be conducted through cross-validation techniques and comparison with sensor network outputs.
+6. Expected Results
+It is expected that the application of machine learning to gas distribution mapping will yield more accurate and efficient gas concentration predictions compared to traditional methods. Additionally, ML algorithms will likely provide more flexibility in adapting to different environmental conditions, improving the capability of real-time gas monitoring systems.
+7. Timeline
+Phase
+Duration
+Literature Review
+1 month
+Data Collection
+1.5 months
+Model Development
+2 months
+Model Testing and Evaluation
+1 month
+Final Report Writing
+1 month
+
+8. Conclusion
+The proposed research will investigate the application of machine learning in gas distribution mapping to enhance environmental monitoring and industrial safety. By leveraging advanced algorithms and real-time data, this project aims to significantly improve the precision and scalability of gas mapping, making it a valuable tool for both researchers and industries concerned with atmospheric monitoring.
+References
+(Stojanovic et al., 2020) – Artificial neural networks for environmental applications.
+(Trincavelli et al., 2011) – Gas distribution mapping using mobile robots.
+

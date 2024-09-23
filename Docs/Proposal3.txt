@@ -1,0 +1,50 @@
+Bachelor Thesis Proposal Version 2
+Title: Machine Learning Applications in Gas Distribution Mapping: Enhancing Precision and Efficiency
+1. Introduction
+
+Gas distribution mapping (GDM) provides critical insights into the spatial dispersion of gases such as methane (CH₄), carbon dioxide (CO₂), and nitrogen oxides (NOₓ). Traditional GDM techniques, which rely on physical sensor networks, are often limited in accuracy, real-time capability, and cost-effectiveness. Machine learning (ML) offers a transformative potential in enhancing the accuracy and efficiency of gas mapping, particularly in dynamic environments such as urban areas and industrial sites.
+
+The use of ML models can help predict gas concentrations based on a range of environmental factors like temperature, wind speed, and sensor data. Techniques such as neural networks, decision trees, and ensemble learning have been shown to outperform traditional interpolation methods in gas detection and distribution tasks (Hernandez-Betancourt et al., 2021), (Rigas et al., 2020). This project will explore the application of machine learning to GDM, seeking to enhance predictive models and improve real-time environmental monitoring.
+2. Research Questions
+
+    How can machine learning be effectively integrated into gas distribution mapping for real-time predictions?
+    Which ML algorithms are best suited for predicting gas concentrations in complex environments?
+    What are the practical benefits of using machine learning in GDM compared to conventional methods like Kriging?
+
+3. Objectives
+
+The research aims to:
+
+    Develop a machine learning-based GDM framework that incorporates real-time sensor data for accurate predictions.
+    Compare multiple machine learning algorithms (e.g., random forests, neural networks, support vector machines) in terms of prediction accuracy, computational efficiency, and scalability.
+    Evaluate the potential of ML-based GDM for real-world applications, such as industrial gas leak detection and urban pollution monitoring.
+
+4. Literature Review
+
+Several studies have demonstrated the potential of machine learning for environmental monitoring. For instance, random forests have been shown to accurately predict gas concentrations in industrial settings with higher reliability than conventional methods (Jain et al., 2019). Moreover, advanced deep learning techniques, such as convolutional neural networks (CNNs), have been used to map gas concentrations in 3D environments (Hernandez-Betancourt et al., 2021). By combining sensor data with ML algorithms, researchers can improve both prediction accuracy and anomaly detection, making ML a promising addition to gas monitoring systems.
+5. Methodology
+
+This project will employ the following methodology:
+
+    Data Collection: Real-time gas data from sensors will be gathered, including parameters such as gas concentration, temperature, and wind speed.
+    Model Development: Various machine learning models (e.g., random forests, CNNs, SVMs) will be developed to predict gas distribution based on the collected data.
+    Evaluation and Testing: The models will be evaluated on metrics such as prediction accuracy, RMSE, and processing time. These will be compared with traditional GDM techniques like Kriging.
+    Real-World Testing: The final model will be tested in industrial or urban environments to validate its performance.
+
+6. Expected Results
+
+The ML models are expected to outperform traditional methods in terms of prediction accuracy and speed, offering scalable solutions for real-time gas monitoring and industrial safety.
+7. Timeline
+Task	Duration
+Data Collection	1.5 months
+Model Development	2 months
+Testing and Validation	1 month
+Writing and Presentation	1 month
+8. Conclusion
+
+This research seeks to develop a machine learning framework for gas distribution mapping, with a focus on improving accuracy and real-time capabilities. By comparing ML techniques with traditional GDM methods, the study will highlight how machine learning can enhance environmental monitoring and industrial safety.
+References
+
+    (Hernandez-Betancourt et al., 2021) – Robust estimation of environmental gas distribution using machine learning.
+    (Jain et al., 2019) – Evaluating the performance of random forests in gas distribution mapping.
+    (Rigas et al., 2020) – Enhancing gas sensing with multivariate data fusion for more accurate predictions.

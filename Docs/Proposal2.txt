@@ -1,0 +1,55 @@
+Bachelor Thesis Proposal Version 1
+Title: Improving Gas Distribution Mapping Using Machine Learning for Enhanced Environmental Monitoring
+1. Introduction
+
+Gas distribution mapping (GDM) is crucial for monitoring gas concentrations in the atmosphere, particularly for industrial safety, pollution control, and environmental conservation. Conventional methods rely on physical sensor networks and manual interpolation to create gas maps. However, these approaches are limited by their high cost, time-consuming data analysis, and difficulty in real-time implementation. The integration of machine learning (ML) techniques into GDM promises to overcome these challenges by automating data analysis, enhancing predictive accuracy, and providing real-time capabilities.
+
+Machine learning algorithms such as neural networks, decision trees, and regression models have shown promising results in environmental monitoring applications. For instance, studies have used machine learning to improve the accuracy of gas concentration predictions and to identify patterns in atmospheric pollution, making them highly suitable for GDM (Rigas et al., 2020), (Monroy et al., 2018). This project proposes a machine learning-based approach to optimize gas distribution mapping, enhancing its efficiency, accuracy, and real-time applicability.
+2. Research Questions
+
+This research will address the following questions:
+
+    How can machine learning be leveraged to improve the accuracy and efficiency of gas distribution mapping?
+    Which machine learning algorithms are most effective in predicting gas distribution based on real-time sensor data?
+    What are the key advantages and limitations of applying machine learning compared to traditional gas mapping methods?
+
+3. Objectives
+
+The primary objectives of this research are:
+
+    To develop a machine learning model for real-time prediction of gas concentrations.
+    To evaluate the performance of different machine learning algorithms, such as support vector machines (SVM), neural networks, and decision trees, in GDM.
+    To compare the proposed ML-based approach with traditional GDM methods, such as inverse distance weighting (IDW) and Kriging.
+
+4. Literature Review
+
+Machine learning has already made strides in environmental monitoring, including air quality prediction and pollution detection. For instance, neural networks have been used to accurately predict methane levels in industrial areas based on atmospheric data (Monroy et al., 2018), while support vector machines have demonstrated their utility in detecting gas leaks in pipelines by analyzing sensor data (Trincavelli et al., 2011). Moreover, multivariate data fusion methods have enhanced the accuracy of gas sensors, making them a promising complement to machine learning models (Rigas et al., 2020).
+
+By combining multiple sources of sensor data with machine learning algorithms, it is possible to generate highly accurate gas distribution maps, detect anomalies, and predict future gas distribution patterns more efficiently than traditional methods.
+5. Methodology
+
+The project methodology will involve:
+
+    Data Collection: Atmospheric gas data will be collected from existing sensor networks, including temperature, humidity, wind speed, and gas concentration.
+    Model Development: Various machine learning models (SVM, neural networks, decision trees) will be trained to predict gas concentrations using the collected data.
+    Model Testing and Evaluation: Performance metrics such as accuracy, root mean squared error (RMSE), and computational speed will be used to compare machine learning predictions with traditional mapping techniques like Kriging and IDW.
+    Real-World Testing: The models will be tested in urban and industrial settings to validate their predictive accuracy and scalability.
+
+6. Expected Results
+
+The application of machine learning is expected to provide more precise and real-time gas distribution maps, reducing the latency and improving the adaptability of gas monitoring systems.
+7. Timeline
+Task	Duration
+Literature Review	1 month
+Data Collection	1.5 months
+Model Development	2 months
+Testing and Validation	1 month
+Writing and Presentation	1 month
+8. Conclusion
+
+This research aims to develop a machine learning-based approach for improving gas distribution mapping, focusing on its accuracy and real-time capabilities. By comparing ML techniques with traditional methods, this study will highlight the benefits of integrating artificial intelligence into environmental monitoring.
+References
+
+    (Rigas et al., 2020) – Multivariate data fusion for enhancing gas sensing accuracy.
+    (Monroy et al., 2018) – Mobile robot-based gas distribution mapping.
+    (Trincavelli et al., 2011) – Gas distribution mapping using support vector machines and sensor networks.
