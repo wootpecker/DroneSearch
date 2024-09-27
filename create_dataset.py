@@ -10,8 +10,8 @@ from torch.utils import data
 
 def main():
     data="train" #train,valid,test                   Old/30x25/
-    transformed=False #reduce 30x25->6x5
-    sequence=[39,100]# specify which image to be shown in data of x,y->[x,y,30,25]
+    transformed=True #reduce 30x25->6x5
+    sequence=[2,100]# specify which image to be shown in data of x,y->[x,y,30,25]
     size=[6,5]#size of plots
     dataset_GDM,dataset_GSL=load_data(data)
     load_imgshow_dataset(sequence,data,transformed,size)#show image sequence 39
@@ -24,7 +24,7 @@ def main():
     
 
     #transform to 6x5 matrix
-    transform_datasets(transformed,dataset_GDM,dataset_GSL)
+    #transform_datasets(transformed,dataset_GDM,dataset_GSL)
 
 
 #load data
@@ -33,6 +33,14 @@ def load_data(name):
     dataset_GDM=dataset["GDM"]    
     dataset_GSL=dataset["GSL"] 
     return dataset_GDM,dataset_GSL
+
+
+def load_combined_dataset(name,transformed):    
+    if(transformed):
+        name = name + "_combined_6x5"
+    else:
+        name = name + "_combined"
+    dataset = torch.load("data/MyTensor/"+name+".pt") 
 
 
 #load and show dataset in plots of size
