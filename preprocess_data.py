@@ -19,6 +19,9 @@ def main():
     create_dataset.show_as_image_sequence(dataset, SEQUENCE,SIZE)
     return 0
 
+def test():
+    dataset = create_dataset.load_combined_dataset(DATA,TRANSFORMED)
+
 
 def random_cell_generator():
     seed_generator() 
@@ -26,8 +29,8 @@ def random_cell_generator():
     array = np.zeros([120, 420, 6, 5])
     shape = dataset.shape
     for i in range(shape[0]):
+        find_source_location(dataset,i)
         for j in range(shape[1]):
-            include_source_location(dataset,i,j)
             amount_of_elements = random.randint(1, MAX_ELEMENTS)
             random_elements = random.sample(range(0, 30), int(amount_of_elements))
             for elements in random_elements:                
@@ -36,11 +39,21 @@ def random_cell_generator():
                 array[i,j,x,y]=dataset[i,j,x,y,0]
     return array
 
-def include_source_location(dataset,i,j):
+def include_source_location(dataset,i):
     #x=random.randint(0,1)
     #if(x>0):
-    z=torch.argmax(dataset[i,j],dim=2)
+    z=torch.argmax(dataset[i],dim=3)
+    y= torch.argmax(z)
     print(z)
+    print(y)
+
+def find_source_location(dataset,i):
+    shape = dataset.shape
+    z=torch.argmax(dataset[i],dim=3)
+    y= torch.argmax(z)
+    print(z)
+    print(y)
+    return y
 
 
 def random_path_generator():
