@@ -5,16 +5,15 @@ from torch.utils import data
 #from data.gdm_dataset import GasDataSet
 
 
-
+DATA="train" #train,valid,test                   Old/30x25/
+TRANSFORMED=True #reduce 30x25->6x5
+SEQUENCE=[2,100]# specify which image to be shown in data of x,y->[x,y,30,25]
+SIZE=[6,5]#size of plots
 
 
 def main():
-    data="train" #train,valid,test                   Old/30x25/
-    transformed=True #reduce 30x25->6x5
-    sequence=[2,100]# specify which image to be shown in data of x,y->[x,y,30,25]
-    size=[6,5]#size of plots
-    dataset_GDM,dataset_GSL=load_data(data)
-    load_imgshow_dataset(sequence,data,transformed,size)#show image sequence 39
+    dataset_GDM,dataset_GSL=load_data(DATA)
+    load_imgshow_dataset(SEQUENCE,DATA,TRANSFORMED,SIZE)#show image sequence 39
     #load_imgshow_dataset(39,"train_combined_6x5.pt")
     #save datasets [GDM,GSL] -> RG image
     #dataset_mixed=combine_datasets(dataset_GDM.numpy(),dataset_GSL.numpy(),"train_combined.pt")
@@ -29,19 +28,38 @@ def main():
 
 #load data
 def load_data(name):
+    """
+    Load Dataset out of name of file(train,valid,test)
+    
+    Parameters:
+    name(string) : String with train,valid,test to load their dataset
+    
+    Returns:
+    Dataset of GDM(Gas Distribution Map) and GSL(Gas Source Location) seperately
+    """
     dataset = torch.load("data/"+name+".pt")
     dataset_GDM=dataset["GDM"]    
     dataset_GSL=dataset["GSL"] 
     return dataset_GDM,dataset_GSL
 
+#load GDM and GSL combined
+def load_combined_dataset(name,transformed):
+    """
+    Load combined Dataset out of name of file(train,valid,test)
+    
+    Parameters:
+    name(string) : String with train,valid,test to load their dataset
+    transformed(boolean) : If transformed is True, the 6x5 reduced dataset will be loaded
 
-def load_combined_dataset(name,transformed):    
+    Returns:
+    Dataset of GDM(Gas Distribution Map) and GSL(Gas Source Location) combined in one tensor
+    """    
     if(transformed):
         name = name + "_combined_6x5"
     else:
         name = name + "_combined"
     dataset = torch.load("data/MyTensor/"+name+".pt") 
-
+    return dataset
 
 #load and show dataset in plots of size
 def load_imgshow_dataset(sequence,name,transformed,size):    
@@ -53,6 +71,16 @@ def load_imgshow_dataset(sequence,name,transformed,size):
     show_as_image_sequence(dataset,sequence,size)
     
 def show_as_image_sequence(dataset, sequence,size):
+    """
+    Show Dataset as images -> sequence is which wind map we want to use
+    
+    Parameters:
+    name(string) : String with train,valid,test to load their dataset
+    transformed(boolean) : If transformed is True, the 6x5 reduced dataset will be loaded
+
+    Returns:
+    Dataset of GDM(Gas Distribution Map) and GSL(Gas Source Location) combined in one tensor
+    """  
     X = dataset[sequence[0]]
     f, arr = plt.subplots(size[0],size[1]) 
     for i in range(arr.shape[0]*arr.shape[1]):
