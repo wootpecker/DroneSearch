@@ -6,25 +6,32 @@ from torch.utils import data
 
 
 DATA="train" #train,valid,test                   Old/30x25/
-TRANSFORMED=True #reduce 30x25->6x5
-SEQUENCE=[2,100]# specify which image to be shown in data of x,y->[x,y,30,25]
+TRANSFORMED=False #reduce 30x25->6x5
+SEQUENCE=[2,100]# specify which image to be shown in data of x,y->[x,y,30,25]   example:39,2
 SIZE=[6,5]#size of plots
 
 
 def main():
     dataset_GDM,dataset_GSL=load_data(DATA)
-    load_imgshow_dataset(SEQUENCE,DATA,TRANSFORMED,SIZE)#show image sequence 39
-    #load_imgshow_dataset(39,"train_combined_6x5.pt")
+    load_imgshow_dataset(SEQUENCE,DATA,TRANSFORMED,SIZE)
+
     #save datasets [GDM,GSL] -> RG image
     #dataset_mixed=combine_datasets(dataset_GDM.numpy(),dataset_GSL.numpy(),"train_combined.pt")
 
-    #save datasets [GDM,GSL,0] -> RGB image
-    #save_imgshow_dataset(dataset_mixed,"train_combined_imshow.pt")#save image sequences as tensor
-    
-
     #transform to 6x5 matrix
-    #transform_datasets(transformed,dataset_GDM,dataset_GSL)
+    #transform_datasets(TRANSFORMED,DATA,dataset_GDM,dataset_GSL)
+    
+    #create all datasets
+    create_all_datasets()
 
+
+
+def create_all_datasets():
+    datasets=["train","valid","test"]
+    for dataset in datasets:
+        dataset_GDM,dataset_GSL=load_data(dataset)
+        transform_datasets(True,dataset,dataset_GDM,dataset_GSL)
+        transform_datasets(False,dataset,dataset_GDM,dataset_GSL)
 
 #load data
 def load_data(name):
@@ -75,11 +82,11 @@ def show_as_image_sequence(dataset, sequence,size):
     Show Dataset as images -> sequence is which wind map we want to use
     
     Parameters:
-    name(string) : String with train,valid,test to load their dataset
-    transformed(boolean) : If transformed is True, the 6x5 reduced dataset will be loaded
-
-    Returns:
-    Dataset of GDM(Gas Distribution Map) and GSL(Gas Source Location) combined in one tensor
+    dataset(string) : String with train,valid,test to load their dataset
+    sequence(boolean) : If transformed is True, the 6x5 reduced dataset will be loaded
+    size()
+    
+    Plots of Datasets 
     """  
     X = dataset[sequence[0]]
     f, arr = plt.subplots(size[0],size[1]) 
@@ -87,18 +94,21 @@ def show_as_image_sequence(dataset, sequence,size):
         iy=int(i%size[1])
         ix=int(i/size[1])
         arr[ix,iy].imshow(X[i+sequence[1]].squeeze())
+        plt.subplot(size[0],size[1],i+1)
+        plt.xticks([])
+        plt.yticks([])
+        plt.xlabel(str(sequence[1]+i)+" s")
     plt.show()
 
 
-
-def transform_datasets(transformed,dataset_GDM,dataset_GSL):
+def transform_datasets(transformed, data_name, dataset_GDM,dataset_GSL):
     if(transformed):
         dataset_GSL=transform_gsl_6x5(dataset_GSL)
         dataset_GDM=transform_gdm_6x5(dataset_GDM)
         #transformed_GSL=find_distinctive_source(dataset_GSL)
-        combine_save_dataset(dataset_GDM,dataset_GSL,data+"_combined_6x5")
+        combine_save_dataset(dataset_GDM,dataset_GSL,data_name+"_combined_6x5")
     else:
-        combine_save_dataset(dataset_GDM,dataset_GSL,data+"_combined")
+        combine_save_dataset(dataset_GDM,dataset_GSL,data_name+"_combined")
 
 
 def combine_save_dataset(dataset_GDM,dataset_GSL,name):
@@ -106,7 +116,7 @@ def combine_save_dataset(dataset_GDM,dataset_GSL,name):
     save_imgshow_dataset(dataset_mixed,name)
 
 def combine_datasets(dataset_GDM,dataset_GSL,name):
-    dataset_mixed = torch.stack((dataset_GDM, dataset_GSL), dim=-1)
+    dataset_mixed = torch.stack((dataset_GSL,dataset_GDM), dim=-1)
     #dataset_mixed=np.stack((dataset_GDM,dataset_GSL),axis=-1)
     #dataset_mixed=torch.tensor(dataset_mixed)
     torch.save(dataset_mixed, "data/MyTensor/"+name+".pt")
@@ -115,6 +125,8 @@ def combine_datasets(dataset_GDM,dataset_GSL,name):
     return dataset_mixed
 
 def save_imgshow_dataset(dataset_mixed,name):
+    #save datasets [GDM,GSL,0] -> RGB image
+    #save_imgshow_dataset(dataset_mixed,"train_combined_imshow.pt")#save image sequences as tensor
     name = name+"_imgshow"
     result =torch.nn.functional.pad(dataset_mixed, (0, 1))
     torch.save(result, "data/MyTensor/"+name+".pt")
