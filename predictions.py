@@ -20,15 +20,13 @@ import pandas as pd
 device = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE=32
 LOAD_SEED=16923
-EASY_ACCESS=[1,1]
+DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge"]
+MODEL_TYPES=["VGG24","CNN","VGGVariation"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
 
 
 def main():
     utils.seed_generator(SEED=LOAD_SEED)
-    dataloader_types=["Flattened","Distinctive"] #flattened x:30x25 -> y:750, distinctive x:30x25 -> y:30 
-    model_types=["VGG24","CNN","VGGVariation"] 
-
-    do_predictions(dataloader_type=dataloader_types[EASY_ACCESS[0]],model_type=model_types[EASY_ACCESS[1]])
+    do_predictions(dataloader_type=DATASET_TYPES[4],model_type=MODEL_TYPES[0])
 
     #do_predictions_confusion_matrix(flattened=True)
     #do_predictions_confusion_matrix(model="CNNwithDistinctiveVGG")
@@ -181,12 +179,12 @@ def print_metrics(y_pred,y_list,y_preds_percent,classes):
       #f"Confusion Matrix: {confmat(y_pred,y_list)} \n"
       f"Confusion Matrix shape: {confmat_tensor.shape}"
     )    
-    df_cfm = pd.DataFrame(confmat(y_pred,y_list).numpy(), index = range(classes), columns = range(classes))
     
     #df_cfm.to_csv('data/confusion_matrix/cfmtest.csv')
     #print("saved")
     if(classes>100):
         #plt.figure(figsize = (10,7))
+        df_cfm = pd.DataFrame(confmat(y_pred,y_list).numpy(), index = range(classes), columns = range(classes))
         plt.imshow(df_cfm.to_numpy())
     else:
         #plot confusion matrix

@@ -48,8 +48,12 @@ def load_model(model: torch.nn.Module, target_dir: str, model_type: str, device=
   # Save the model state_dict()
   print(f"[INFO] Loading model from: {model_load_path}")
   return model
+
+
 def x():
    load_model()
+
+
 def plot_loss_curves(results: Dict[str, List[float]]):
     """Plots training curves of a results dictionary.
 
@@ -96,3 +100,31 @@ def plot_loss_curves(results: Dict[str, List[float]]):
 def seed_generator(SEED=16923):                #Random Seed Generator for each function
   seed=random.seed(SEED)
   torch_seed=torch.manual_seed(SEED)
+  return seed,torch_seed
+
+
+
+
+def load_data(name):
+    """
+    Load Dataset out of name of file(train,valid,test)
+    
+    Parameters:
+    name(string) : String with train,valid,test to load their dataset
+    
+    Returns:
+    Dataset of GDM(Gas Distribution Map) and GSL(Gas Source Location) seperately
+    """
+    dataset = torch.load("data/original/"+name+".pt")
+    dataset_GDM=dataset["GDM"]    
+    dataset_GSL=dataset["GSL"] 
+    return dataset_GDM,dataset_GSL
+
+
+def save_dataset(dataset_GDM,dataset_GSL,dataset_type,dataset):
+  target_dir_path = Path("data/MyTensor")
+  target_dir_path.mkdir(parents=True, exist_ok=True)  
+  target_dir_path = Path(f"data/MyTensor/datasets_{dataset_type}")
+  target_dir_path.mkdir(parents=True, exist_ok=True) 
+  torch.save({'X': dataset_GDM, 'y':dataset_GSL},f"data/MyTensor/datasets_{dataset_type}/{dataset}.pt")
+  print(f"[INFO] Dataset saved at: data/MyTensor/datasets_{dataset_type}/{dataset}.pt")
