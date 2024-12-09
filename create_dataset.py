@@ -4,6 +4,8 @@ import torch
 from torch.utils import data
 import utils, datatransformer
 from pathlib import Path
+from timeit import default_timer as timer 
+
 
 #from data.gdm_dataset import GasDataSet
 
@@ -18,7 +20,9 @@ DATASETS=["train","valid","test"]
 def main():
     #transform_dataset(DATASET_TYPES[3],distance=3,pad=2)
     #test()
-    create_all_datasets()
+    test_72x72_all()
+    test_72x72()
+    #create_all_datasets()
 
 
 def create_all_datasets():
@@ -36,6 +40,24 @@ def test():
             print(x)
     print(f"[INFO] result shape: {dataset_GDM.shape}")
     print(f"[INFO] result: {dataset_GDM}") 
+
+def test_72x72():
+    test72=torch.rand(100000,1,72,72)
+    start_time = timer()
+    for x in range(test72.shape[0]):
+        test72[x]=datatransformer.transform_datasets_with_type(dataset_GDM=test72[x],dataset_type=DATASET_TYPES[3])
+        if(x%10000==0):
+            print(x)
+    end_time = timer()
+    print(f"[INFO] Total training time: {end_time-start_time:.3f} seconds")
+
+def test_72x72_all():
+    test72=torch.rand(100000,1,72,72)
+    start_time = timer()
+    test72=datatransformer.transform_datasets_with_type(dataset_GDM=test72,dataset_type=DATASET_TYPES[3])
+    end_time = timer()
+    print(f"[INFO] Total training time: {end_time-start_time:.3f} seconds")
+
 
 def transform_dataset(dataset_type="Flattened",distance=5,pad=1,start_left=True,adequate_input=30):
     target_dir_path = Path(f"data/MyTensor/datasets_{dataset_type}")
