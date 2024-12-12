@@ -20,13 +20,13 @@ import pandas as pd
 device = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE=32
 LOAD_SEED=16923
-DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge"]
-MODEL_TYPES=["VGG24","CNN","VGGVariation"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
+DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder"]
+MODEL_TYPES=["VGG24","CNN","VGGVariation","UnetEncoderDecoder"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
 
 
 def main():
     utils.seed_generator(SEED=LOAD_SEED)
-    do_predictions(dataloader_type=DATASET_TYPES[4],model_type=MODEL_TYPES[0])
+    do_predictions(dataloader_type=DATASET_TYPES[6],model_type=MODEL_TYPES[3])
 
     #do_predictions_confusion_matrix(flattened=True)
     #do_predictions_confusion_matrix(model="CNNwithDistinctiveVGG")

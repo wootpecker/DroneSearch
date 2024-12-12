@@ -15,9 +15,9 @@ def main():
 
 
 def create_dataloader(dataloader_type="Flattened", batch_size=32):
-    train_dataset = create_dataset.Combined_Distinctive_Source(f"data/MyTensor/datasets_{dataloader_type}/train.pt")
-    test_dataset = create_dataset.Combined_Distinctive_Source(f"data/MyTensor/datasets_{dataloader_type}/test.pt")
-    valid_dataset = create_dataset.Combined_Distinctive_Source(f"data/MyTensor/datasets_{dataloader_type}/valid.pt")
+    train_dataset = create_dataset.SuperDataset(f"data/MyTensor/datasets_{dataloader_type}/train.pt")
+    test_dataset = create_dataset.SuperDataset(f"data/MyTensor/datasets_{dataloader_type}/test.pt")
+    valid_dataset = create_dataset.SuperDataset(f"data/MyTensor/datasets_{dataloader_type}/valid.pt")
     classes=train_dataset.classes
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)

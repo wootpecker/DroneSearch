@@ -14,8 +14,8 @@ BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 LOAD_SEED=16923
 TRAIN_SEED=42
-DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge"]
-MODEL_TYPES=["VGG24","CNN","VGGVariation"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
+DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder"]
+MODEL_TYPES=["VGG24","CNN","VGGVariation","UnetEncoderDecoder"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
 
 # Setup target device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -30,7 +30,7 @@ data_transform = transforms.Compose([
 def main():
   utils.seed_generator(SEED=LOAD_SEED)
    
-  train_all_models(dataloader_type=DATASET_TYPES[1],model_type= MODEL_TYPES[0])
+  train_all_models(dataloader_type=DATASET_TYPES[6],model_type= MODEL_TYPES[3])
 
 
 
@@ -60,7 +60,10 @@ s
   model = model_builder.choose_model(model_type=model_type,output_shape=classes,device=device)
 
   # Set loss and optimizer
-  loss_fn = torch.nn.CrossEntropyLoss()
+  if(dataloader_type==DATASET_TYPES[6]):
+    loss_fn = torch.nn.BCEWithLogitsLoss()
+  else:
+    loss_fn = torch.nn.CrossEntropyLoss()     
   optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
   #Training + Duration

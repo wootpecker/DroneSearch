@@ -9,7 +9,7 @@ DATA="train" #train,valid,test                   Old/30x25/
 TRANSFORMED=False #reduce 30x25->6x5
 SEQUENCE=[2,100]# specify which image to be shown in data of x,y->[x,y,30,25]   example:39,2
 SIZE=[6,5]#size of plots
-DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge"]
+DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder"]
 DATASETS=["train","valid","test"]
 LOAD_SEED=16923
 TRAIN_SEED=42
@@ -46,7 +46,7 @@ def main():
 
 
 
-def transform_datasets_with_type(dataset_GDM,dataset_type,distance=3,pad=1,start_left=True,adequate_input=30):
+def transform_datasets_with_type(dataset_GDM,dataset_GSL,dataset_type,distance=3,pad=1,start_left=True,adequate_input=30):
     #adequate_input=30
     if(dataset_type==DATASET_TYPES[1]):   #flattened input ->30x25->750
         return dataset_GDM
@@ -61,14 +61,32 @@ def transform_datasets_with_type(dataset_GDM,dataset_type,distance=3,pad=1,start
         coordinates=generate_coordinates_random(dataset_GDM=dataset_GDM.shape,distance=distance,pad=pad,shuffler=shuffler)
     elif(dataset_type==DATASET_TYPES[5]): #Edge of plume (start fro\\\m source -> find border )
         coordinates=generate_coordinates_grid(dataset_GDM.shape,distance=distance,pad=pad)
+    elif(dataset_type==DATASET_TYPES[6]): #Edge of plume (start fro\\\m source -> find border )
+        coordinates=generate_coordinates_s_shape(dataset_GDM.shape,distance=distance,pad=pad,start_left=start_left)
     dataset_GDM=dataset_GDM.squeeze()
-    if(len(dataset_GDM.shape)>2):
-        dataset_GDM=do_transformation(dataset_GDM=dataset_GDM,coordinates=coordinates,adequate_input=adequate_input)
-    else:
-        dataset_GDM=do_single_transformation(dataset_GDM=dataset_GDM,coordinates=coordinates,adequate_input=adequate_input)
+    dataset_GDM=do_transformation(dataset_GDM=dataset_GDM,coordinates=coordinates,adequate_input=adequate_input)
+    dataset_GSL = dataset_GSL.reshape(-1, dataset_GSL.shape[-1]*dataset_GSL.shape[-2])
+    return dataset_GDM, dataset_GSL
+
+
+def transform_single_with_type(dataset_GDM,dataset_type,randomizer=None,distance=3,pad=1,start_left=True,adequate_input=30):
+    #adequate_input=30
+    if(dataset_type==DATASET_TYPES[2]): #S-Shape source (distance between cross, offset from border)
+        coordinates=generate_coordinates_s_shape(dataset_GDM.shape,distance=distance,pad=pad,start_left=start_left,)
+    elif(dataset_type==DATASET_TYPES[3]): #Grid (distance between points, offset from border)
+        coordinates=generate_coordinates_grid(dataset_GDM.shape,distance=distance,pad=pad)
+    elif(dataset_type==DATASET_TYPES[4]): #Random ()
+        coordinates=generate_coordinates_random_single(dataset_GDM=dataset_GDM.shape,randomizer=randomizer,distance=distance,pad=pad)
+    elif(dataset_type==DATASET_TYPES[5]): #Edge of plume (start fro\\\m source -> find border )
+        coordinates=generate_coordinates_grid(dataset_GDM.shape,distance=distance,pad=pad)
+    dataset_GDM=dataset_GDM.squeeze()
+    dataset_GDM=single_adequate_input(dataset_GDM=dataset_GDM,coordinates=coordinates,adequate_input=adequate_input)
     return dataset_GDM
 
-def do_single_transformation(dataset_GDM,coordinates,adequate_input=30):
+
+
+
+def single_adequate_input(dataset_GDM,coordinates,adequate_input=30):
     if(adequate_input>0):
         transformed_dataset= np.zeros_like(dataset_GDM)
         for x,y in coordinates:
@@ -106,7 +124,7 @@ def do_transformation(dataset_GDM,coordinates,adequate_input=30):
                 transformed_dataset[:,x,y]=dataset_GDM[:,x,y]
         #transformed_dataset = transformed_dataset.reshape(-1,1, transformed_dataset.shape[-1]*transformed_dataset.shape[-2])
         #result=torch.from_numpy(transformed_dataset)
-        return torch.from_numpy(transformed_dataset)
+        return torch.from_numpy(transformed_dataset).unsqueeze(1)
 
 
 def generate_coordinates_s_shape(dataset_GDM,distance=3,pad=2,start_left=True):
@@ -159,13 +177,12 @@ class CoordinateShuffler:
         new_randomizer.shuffle(coordinates)
         return coordinates
 
-def generate_coordinates_random2(dataset_GDM,distance=3,pad=2):
+def generate_coordinates_random_single(dataset_GDM,randomizer,distance=3,pad=2):
     width,height=dataset_GDM[-2],dataset_GDM[-1]
     reduced_datapoints=(width-2*pad)*(height-2*pad)
     distance=min(distance,9)
     random_datapoints=int(reduced_datapoints*(10-distance)/10)
     all_coordinates = [(x, y) for x in range(pad,width-pad-1) for y in range(pad,height-pad-1)]
-    randomizer= np.random.default_rng(LOAD_SEED)
     randomizer.shuffle(all_coordinates)
     return all_coordinates[:random_datapoints]
 
