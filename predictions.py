@@ -21,7 +21,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE=32
 LOAD_SEED=16923
 DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder"]
-MODEL_TYPES=["VGG24","CNN","VGGVariation","UnetEncoderDecoder"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
+MODEL_TYPES=["VGG24","CNN","VGGVariation","UnetEncoderDecoder","SimpleUNet"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
 
 
 def main():
@@ -146,14 +146,21 @@ def make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
     plt.show()
 
 def reshape_tensor(y_list,y_logit_list,y_preds_percent):
-    if(y_list.shape[-1]>30):
-        y_list=torch.reshape(y_list, (y_list.shape[0], 30, 25))
-        y_logit_list=torch.reshape(y_logit_list, (y_logit_list.shape[0], 30, 25))
-        y_preds_percent=torch.reshape(y_preds_percent, (y_preds_percent.shape[0], 30, 25))
+    if(y_list.shape[-2]>1):
+        return y_list,y_logit_list,y_preds_percent
     else:
-        y_list=torch.reshape(y_list, (y_list.shape[0], 6, 5))
-        y_logit_list=torch.reshape(y_logit_list, (y_logit_list.shape[0], 6, 5))
-        y_preds_percent=torch.reshape(y_preds_percent, (y_preds_percent.shape[0], 6, 5))
+        if(int(y_list.shape[-1]/24)>24):
+            y_list=torch.reshape(y_list, (y_list.shape[0], 30, 25))
+            y_logit_list=torch.reshape(y_logit_list, (y_logit_list.shape[0], 30, 25))
+            y_preds_percent=torch.reshape(y_preds_percent, (y_preds_percent.shape[0], 30, 25))
+        elif(int(y_list.shape[-1]/24)>20):
+            y_list=torch.reshape(y_list, (y_list.shape[0], 24, 24))
+            y_logit_list=torch.reshape(y_logit_list, (y_logit_list.shape[0], 24, 24))
+            y_preds_percent=torch.reshape(y_preds_percent, (y_preds_percent.shape[0], 24, 24))           
+        else:
+            y_list=torch.reshape(y_list, (y_list.shape[0], 6, 5))
+            y_logit_list=torch.reshape(y_logit_list, (y_logit_list.shape[0], 6, 5))
+            y_preds_percent=torch.reshape(y_preds_percent, (y_preds_percent.shape[0], 6, 5))
     return y_list,y_logit_list,y_preds_percent
 
 

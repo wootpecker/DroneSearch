@@ -4,18 +4,18 @@ Trains a PyTorch image classification model using device-agnostic code.
 
 import os
 import torch
-import create_dataloader, utils, engine, model_builder,create_dataset
+import create_dataloader, utils, engine, model_builder,create_dataset,engine_encdec
 from timeit import default_timer as timer 
 from torchvision import transforms
 
 # Setup hyperparameters
-NUM_EPOCHS = 5
+NUM_EPOCHS = 100
 BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 LOAD_SEED=16923
 TRAIN_SEED=42
 DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder"]
-MODEL_TYPES=["VGG24","CNN","VGGVariation","UnetEncoderDecoder"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
+MODEL_TYPES=["VGG24","CNN","VGGVariation","UnetEncoderDecoder","SimpleUNet"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
 
 # Setup target device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -60,16 +60,20 @@ s
   model = model_builder.choose_model(model_type=model_type,output_shape=classes,device=device)
 
   # Set loss and optimizer
-  if(dataloader_type==DATASET_TYPES[6]):
-    loss_fn = torch.nn.BCEWithLogitsLoss()
-  else:
-    loss_fn = torch.nn.CrossEntropyLoss()     
+ # either BCEwithLogits
+    #loss_fn = torch.nn.BCELoss()          # or     BCE with sigmoid in Model 
+
+  loss_fn = torch.nn.CrossEntropyLoss()     
   optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
   #Training + Duration
   utils.seed_generator(SEED=TRAIN_SEED)
   start_time = timer()
-  mode_results=engine.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=NUM_EPOCHS, device=device)
+  if(dataloader_type==DATASET_TYPES[6]):
+    loss_fn = torch.nn.BCEWithLogitsLoss()
+    mode_results=engine_encdec.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=NUM_EPOCHS, device=device)
+  else:
+    mode_results=engine.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=NUM_EPOCHS, device=device)
   end_time = timer()
   print(f"[INFO] Total training time: {end_time-start_time:.3f} seconds")
   # Save the model and plot loss curve

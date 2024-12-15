@@ -1,10 +1,6 @@
 import create_dataset
 from torch.utils.data import Dataset, DataLoader
 
-DATA="train" #train,valid,test                   Old/30x25/
-TRANSFORMED=False #reduce 30x25->6x5
-SEQUENCE=[2,100]# specify which image to be shown in data of x,y->[x,y,30,25]   example:39,2
-SIZE=[6,5]#size of plots
 
 
 def main():

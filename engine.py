@@ -59,7 +59,7 @@ def train_step(model: torch.nn.Module,
         y_index=torch.argmax(y,dim=1)
         # Calculate and accumulate accuracy metric across all batches
         y_pred_class = torch.argmax(torch.softmax(y_pred, dim=1), dim=1)
-        train_acc += (y_pred_class == y_index).sum().item()/ len(y_pred_class)#y.size(0)
+        train_acc += (y_pred_class == y_index).sum().item()/ len(y_pred)#y.size(0)
 
     # Adjust metrics to get average loss and accuracy per batch 
     train_loss = train_loss / len(dataloader)

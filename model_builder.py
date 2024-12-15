@@ -22,7 +22,10 @@ def choose_model(model_type="VGG24", output_shape=30, device="cuda", input_shape
   elif(model_type=="UnetEncoderDecoder"):
     output_shape=1
     model = UnetEncoderDecoder(output_shape).to(device)
-  
+  elif(model_type=="SimpleUNet"):
+    output_shape=1
+    model = SimpleUNet().to(device)
+
   print(f"[INFO] Model (Type: {model_type}, Classes: {output_shape}, Device: {device}) loaded.")
   return model
 
@@ -188,8 +191,11 @@ class UnetEncoderDecoder(nn.Module):
         self.dec_block_1 = self.conv_block(FEATURE_MAP[1],FEATURE_MAP[0])
         
         #Final
-        self.final_block=nn.Conv2d(FEATURE_MAP[0],output_shape,kernel_size=1)
-
+        self.final_block=nn.Sequential(
+          nn.Conv2d(FEATURE_MAP[0],output_shape,kernel_size=1),
+          #nn.Sigmoid()
+          )
+    
 
     def conv_block(self, in_channels, out_channels):
       """Convolutional block with BatchNorm + ReLU."""
@@ -225,7 +231,46 @@ class UnetEncoderDecoder(nn.Module):
       return nn.MaxPool2d(kernel_size=2,stride=2)(x)
 
     def skip_connection(self, x, skip):
-        # Concatenate skip connection
+      # Concatenate skip connection
       #a,b,h,w=x.size()
       #skip = skip.reshape(a, b, h, w)
-      return torch.cat((x, skip), dim=1)
+      return torch.cat((skip, x), dim=1)
+    
+
+
+
+
+
+
+
+
+
+
+
+#TEST ---------------------------------------------------------------TEST
+# Model: A simple UNet-like structure
+class SimpleUNet(nn.Module):
+    def __init__(self):
+        super(SimpleUNet, self).__init__()
+        self.encoder = nn.Sequential(
+            nn.Conv2d(1, 16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(16, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+        )
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(32, 16, kernel_size=2, stride=2),
+            nn.ReLU(),
+            nn.ConvTranspose2d(16, 1, kernel_size=2, stride=2),
+            nn.Sigmoid(),  # Output probabilities
+        )
+
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
+
+# Initialize model, loss, and optimizer
+model = SimpleUNet()

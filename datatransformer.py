@@ -115,7 +115,8 @@ def do_transformation(dataset_GDM,coordinates,adequate_input=30):
                 dataset_GDM[i]=torch.from_numpy(transformed_dataset)
                 #print(np.sum(transformed_dataset>0))
             if(i%10000==0):
-                print(i)
+                print(f"[INFO] Sample number: {i}")
+
         return dataset_GDM.unsqueeze(1)
     else:
         transformed_dataset= np.zeros_like(dataset_GDM)
