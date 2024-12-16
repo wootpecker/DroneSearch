@@ -9,7 +9,7 @@ from timeit import default_timer as timer
 from torchvision import transforms
 
 # Setup hyperparameters
-NUM_EPOCHS = 100
+NUM_EPOCHS = 20
 BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 LOAD_SEED=16923
@@ -30,8 +30,10 @@ data_transform = transforms.Compose([
 def main():
   utils.seed_generator(SEED=LOAD_SEED)
    
+  train_all_models(dataloader_type=DATASET_TYPES[6],model_type= MODEL_TYPES[4])
+  utils.seed_generator(SEED=LOAD_SEED)
+   
   train_all_models(dataloader_type=DATASET_TYPES[6],model_type= MODEL_TYPES[3])
-
 
 
 
@@ -77,7 +79,7 @@ s
   end_time = timer()
   print(f"[INFO] Total training time: {end_time-start_time:.3f} seconds")
   # Save the model and plot loss curve
-  utils.save_model(model=model,target_dir=dataloader_type,model_type=model_type)
+  utils.save_model(model=model,target_dir=dataloader_type,model_type=model_type,device=device)
   utils.plot_loss_curves(mode_results)
 
 

@@ -15,7 +15,7 @@ DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","En
 
 
 def main():
-    #make_plots()
+    make_plots()
     test_create_24_Dataset()
     #test_squares()
     #test_create_24_Dataset()
@@ -177,8 +177,8 @@ def decide_value(value,old_value,older_value,oldest_value,droupout):
 
 
 def make_plots(array_list=torch.rand([100,1,24,24])):
-    array=torch.FloatTensor(create_squares_dropout(center=[3,3],array_size=24, max_layers=10,droupout=10))
-    array_drop=torch.FloatTensor(create_squares_dropout(center=[3,3],array_size=24, max_layers=10,droupout=90))
+    array=torch.FloatTensor(create_squares_dropout(center=[9,9],array_size=24, max_layers=10,droupout=10))
+    array_drop=torch.FloatTensor(create_squares_dropout(center=[9,9],array_size=24, max_layers=10,droupout=90))
     array_transformed=datatransformer.transform_single_with_type(array,DATASET_TYPES[2],randomizer=None,distance=1,pad=0,start_left=True,adequate_input=0)
     array_drop_transformed=datatransformer.transform_single_with_type(array_drop,DATASET_TYPES[2],randomizer=None,distance=1,pad=0,start_left=True,adequate_input=0)
     size=[1,4]
@@ -194,7 +194,7 @@ def make_plots(array_list=torch.rand([100,1,24,24])):
         arr[2].imshow(array_transformed.squeeze().unsqueeze(-1).numpy())
         arr[2].set(xlabel=f"Sample: {i}, array_transformed")
         arr[3].imshow(array_drop_transformed.squeeze().unsqueeze(-1).numpy())
-        arr[3].set(xlabel=f"Sample: {i}, y_preds_percent")
+        arr[3].set(xlabel=f"Sample: {i}, array_drop_transformed")
         #plt.xticks([])
         #plt.yticks([])
    # f.tight_layout()

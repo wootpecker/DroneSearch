@@ -264,13 +264,10 @@ class SimpleUNet(nn.Module):
             nn.ConvTranspose2d(32, 16, kernel_size=2, stride=2),
             nn.ReLU(),
             nn.ConvTranspose2d(16, 1, kernel_size=2, stride=2),
-            nn.Sigmoid(),  # Output probabilities
+            #nn.Sigmoid(),  # Output probabilities
         )
 
     def forward(self, x):
         x = self.encoder(x)
         x = self.decoder(x)
         return x
-
-# Initialize model, loss, and optimizer
-model = SimpleUNet()

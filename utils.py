@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 import random
 
-def save_model(model: torch.nn.Module, target_dir: str, model_type: str):
+def save_model(model: torch.nn.Module, target_dir: str, model_type: str, device="cuda"):
   """Saves a PyTorch model to a target directory.
   Args:
   model: A target PyTorch model to save.
@@ -21,7 +21,7 @@ def save_model(model: torch.nn.Module, target_dir: str, model_type: str):
   target_dir_path.mkdir(parents=True, exist_ok=True)
   # Create model save path
   save_format=".pth"
-  model_name = model_type + save_format
+  model_name = model_type + "_" + device + save_format
   model_save_path = target_dir_path / model_name
 
   # Save the model state_dict()
@@ -40,7 +40,7 @@ def load_model(model: torch.nn.Module, target_dir: str, model_type: str, device=
   target_dir_path = Path("model/"+target_dir)
   # Create model save path
   save_format=".pth"
-  model_name = model_type + save_format
+  model_name = model_type + "_" + device + save_format
   model_load_path = target_dir_path / model_name
   model.load_state_dict(torch.load(f=model_load_path))
   model = model.to(device)

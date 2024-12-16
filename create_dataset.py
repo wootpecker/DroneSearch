@@ -21,9 +21,9 @@ def main():
     #transform_dataset(DATASET_TYPES[3],distance=3,pad=2)
     #test()
     #test_72x72_all()
-    #test_72x72()
-    test_24x24_all()
+    #test_72x72()    
     #create_all_datasets()
+    test_24x24_all()
 
 
 def create_all_datasets():
