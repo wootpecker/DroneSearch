@@ -9,13 +9,13 @@ from timeit import default_timer as timer
 from torchvision import transforms
 
 # Setup hyperparameters
-NUM_EPOCHS = 20
-BATCH_SIZE = 32
+NUM_EPOCHS = 8
+BATCH_SIZE = 64
 LEARNING_RATE = 0.001
 LOAD_SEED=16923
 TRAIN_SEED=42
-DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder"]
-MODEL_TYPES=["VGG24","CNN","VGGVariation","UnetEncoderDecoder","SimpleUNet"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
+DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder","Test30x25","RealLife"]
+MODEL_TYPES=["VGG24","CNN","VGGVariation","UnetEncoderDecoder","SimpleUNet","UnetEncoderDecoder3025"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
 
 # Setup target device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -30,10 +30,10 @@ data_transform = transforms.Compose([
 def main():
   utils.seed_generator(SEED=LOAD_SEED)
    
-  train_all_models(dataloader_type=DATASET_TYPES[6],model_type= MODEL_TYPES[4])
+  train_all_models(dataloader_type=DATASET_TYPES[6],model_type= MODEL_TYPES[3])
   utils.seed_generator(SEED=LOAD_SEED)
    
-  train_all_models(dataloader_type=DATASET_TYPES[6],model_type= MODEL_TYPES[3])
+ # train_all_models(dataloader_type=DATASET_TYPES[6],model_type= MODEL_TYPES[3])
 
 
 
@@ -71,7 +71,7 @@ s
   #Training + Duration
   utils.seed_generator(SEED=TRAIN_SEED)
   start_time = timer()
-  if(dataloader_type==DATASET_TYPES[6]):
+  if(dataloader_type==DATASET_TYPES[6] or DATASET_TYPES[7]):
     loss_fn = torch.nn.BCEWithLogitsLoss()
     mode_results=engine_encdec.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=NUM_EPOCHS, device=device)
   else:

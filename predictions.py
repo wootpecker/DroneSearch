@@ -20,13 +20,13 @@ import pandas as pd
 device = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE=32
 LOAD_SEED=16923
-DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder"]
-MODEL_TYPES=["VGG24","CNN","VGGVariation","UnetEncoderDecoder","SimpleUNet"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
+DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder","Test30x25","RealLife"]
+MODEL_TYPES=["VGG24","CNN","VGGVariation","UnetEncoderDecoder","SimpleUNet","UnetEncoderDecoder3025"] #model_types of model_builder -> Simple CNN, VGGVariation(2 Conv Blocks), VGG24(more complex 3 Conv Blocks)
 
 
 def main():
     utils.seed_generator(SEED=LOAD_SEED)
-    do_predictions(dataloader_type=DATASET_TYPES[6],model_type=MODEL_TYPES[3])
+    do_predictions(dataloader_type=DATASET_TYPES[8  ],model_type=MODEL_TYPES[5])
 
     #do_predictions_confusion_matrix(flattened=True)
     #do_predictions_confusion_matrix(model="CNNwithDistinctiveVGG")
@@ -53,7 +53,7 @@ def do_predictions(dataloader_type="Flattened",model_type= "VGG24"):
     model=utils.load_model(model= model, target_dir=dataloader_type, model_type=model_type, device=device)
 
     y_pred,y_list,X_list,y_logit_list,y_preds_percent=make_prediction_all_results(model=model,test_dataloader=test_dataloader)
-    print_metrics(y_pred,y_list,y_preds_percent,classes)
+    print_metrics(y_pred,y_list,y_logit_list,classes,model_type)
     make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent)  
 
 
@@ -130,7 +130,7 @@ def make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
     random_samples=random.sample(range(X_list.shape[0]),k=5)
     for j in range(arr.shape[0]):
         i=random_samples[j]
-        print(i)
+        #print(i)
         arr[j,0].imshow(X_list[i].squeeze(0).unsqueeze(-1).numpy())
         arr[j,0].set(xlabel=f"Sample: {i}, X")
         arr[j,1].imshow(y_list[i].squeeze(0).unsqueeze(-1).numpy())
@@ -168,7 +168,20 @@ def reshape_tensor(y_list,y_logit_list,y_preds_percent):
 
 
 
-def print_metrics(y_pred,y_list,y_preds_percent,classes):
+def print_metrics(y_pred,y_list,y_logit_list,classes,model_type):
+    if(model_type==MODEL_TYPES[3] or MODEL_TYPES[4] or MODEL_TYPES[5]):
+        y_pred_index = torch.argmax(y_logit_list.view(y_logit_list.shape[0], -1), dim=1)  # [batch]
+        y_list_index = torch.argmax(y_list.view(y_list.shape[0], -1), dim=1)  # [batch]
+
+        # Compare the indices
+        correct = (y_pred_index == y_list_index).float()
+
+        # Calculate accuracy
+        accuracy = correct.mean().item() * 100
+        print(f"Accuracy: {accuracy:.2f}%")
+        compare_mistakes(y_pred_index,y_list_index)
+        return
+                
     y_list=torch.argmax(y_list,dim=1)
     acc = torchmetrics.functional.accuracy(y_pred, y_list, task="multiclass", num_classes=classes)
     #print(acc)
@@ -214,6 +227,19 @@ def plot_conf_sklearn(y_pred_tensor, y_target_tensor, classes):
                                   display_labels=range(classes))
     disp.plot()
 
+
+
+def compare_mistakes(y_pred_index,y_list_index):
+    mistakes=[]
+    correct_values=[]
+    for x in range(y_list_index.shape[0]):
+        if(y_pred_index[x]!=y_list_index[x]):
+            print(
+              f"x: {x} | \n"
+              f"y_pred_index[x]: {y_pred_index[x]} | \n"
+              f"y_list_index[x]: {y_list_index[x]} | \n"
+            )
+            mistakes.append(x)
 
 
 

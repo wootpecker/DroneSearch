@@ -14,7 +14,7 @@ DATA="train" #train,valid,test                   Old/30x25/
 TRANSFORMED=False #reduce 30x25->6x5
 SEQUENCE=[2,100]# specify which image to be shown in data of x,y->[x,y,30,25]   example:39,2
 SIZE=[6,5]#size of plots
-DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder"]
+DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder","Test30x25","RealLife"]
 DATASETS=["train","valid","test"]
 
 def main():
@@ -27,13 +27,13 @@ def main():
 
 
 def create_all_datasets():
-    test=["EncoderDecoder"]
+    test=["RealLife"]
     for dataset in test:
     #for dataset in DATASET_TYPES:
         transform_dataset(dataset,distance=1,pad=0,start_left=True,adequate_input=0)
 
 def test_24x24_all():
-    test24=torch.rand(1000,1,24,24)
+    test24=torch.rand(100000,1,72,72)
     start_time = timer()
     x=torch.load("data/MyTensor/datasets_EncoderDecoder/train.pt")
     x['X']=test24    
@@ -91,18 +91,20 @@ def transform_dataset(dataset_type="Flattened",distance=5,pad=1,start_left=True,
             dataset_GDM,dataset_GSL=datatransformer.transform_datasets_with_type(dataset_GDM=dataset_GDM,dataset_GSL=dataset_GSL,dataset_type=dataset_type,distance=distance,pad=pad,start_left=start_left,adequate_input=adequate_input)
         if(dataset_type==DATASET_TYPES[6]): 
             dataset_GSL=dataset_GDM_reshaped
-            
+        if(dataset_type==DATASET_TYPES[7]):
+            dataset_GDM,dataset_GSL=utils.load_data(dataset)
+            dataset_GDM = dataset_GDM.reshape(-1, 1, dataset_GDM.shape[-2],dataset_GDM.shape[-1])
+            dataset_GSL = dataset_GSL.reshape(-1, 1, dataset_GSL.shape[-2],dataset_GSL.shape[-1])
         print(f"[INFO] Dataset GSL shape: {dataset_GSL.shape}")
         print(f"[INFO] Dataset GDM shape: {dataset_GDM.shape}")        
         utils.save_dataset(dataset_GDM,dataset_GSL,dataset_type,dataset)
         end_time_data = timer()
         print(f"[INFO] Total Transform time ({dataset}): {end_time_data-start_time_data:.3f} seconds")
     end_time = timer()
-    print(f"[INFO] Total Transform time: {end_time-start_time:.3f} seconds")
-    test_transform(dataset_type)
+    print(f"[INFO] All Datsets Transform time: {end_time-start_time:.3f} seconds")
+    #test_transform(dataset_type)
 
 def test_transform(dataset_type="Flattened"):    
-    
     start_time = timer()
     for dataset in DATASETS:
         target_dir_path = Path(f"data/MyTensor/datasets_{dataset_type}/{dataset}.pt")
@@ -115,7 +117,7 @@ def test_transform(dataset_type="Flattened"):
         end_time_data = timer()
         print(f"[INFO] Total Transform time ({dataset}): {end_time_data-start_time_data:.3f} seconds")
     end_time = timer()
-    print(f"[INFO] Total Transform time: {end_time-start_time:.3f} seconds")
+    print(f"[INFO] All Datsets Transform time: {end_time-start_time:.3f} seconds")
 
 
 class SuperDataset(torch.utils.data.Dataset):

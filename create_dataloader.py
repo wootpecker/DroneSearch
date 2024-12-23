@@ -18,7 +18,7 @@ def create_dataloader(dataloader_type="Flattened", batch_size=32):
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     valid_dataloader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=True)
-    print(f"[INFO] Dataloader (Type: {dataloader_type}, Batch size: {batch_size}) created.")
+    print(f"[INFO] Dataloader (Type: {dataloader_type}, Batch size: {batch_size}, Classes: {classes}) created.")
     return train_dataloader,test_dataloader,valid_dataloader, classes
 
 if __name__ == "__main__":

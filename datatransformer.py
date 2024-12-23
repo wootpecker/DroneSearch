@@ -63,9 +63,12 @@ def transform_datasets_with_type(dataset_GDM,dataset_GSL,dataset_type,distance=3
         coordinates=generate_coordinates_grid(dataset_GDM.shape,distance=distance,pad=pad)
     elif(dataset_type==DATASET_TYPES[6]): #Edge of plume (start fro\\\m source -> find border )
         coordinates=generate_coordinates_s_shape(dataset_GDM.shape,distance=distance,pad=pad,start_left=start_left)
+    else:
+        coordinates=generate_coordinates_s_shape(dataset_GDM.shape,distance=1,pad=1,start_left=start_left)
     dataset_GDM=dataset_GDM.squeeze()
     dataset_GDM=do_transformation(dataset_GDM=dataset_GDM,coordinates=coordinates,adequate_input=adequate_input)
     dataset_GSL = dataset_GSL.reshape(-1, dataset_GSL.shape[-1]*dataset_GSL.shape[-2])
+    #dataset_GSL = dataset_GSL.reshape(-1,1, dataset_GSL.shape[-2],dataset_GSL.shape[-1])
     return dataset_GDM, dataset_GSL
 
 
