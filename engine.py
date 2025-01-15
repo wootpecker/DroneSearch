@@ -3,8 +3,10 @@ Contains functions for training and testing a PyTorch model.
 """
 import torch
 import utils
+import random
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
+import numpy
 
 def train_step(model: torch.nn.Module, 
                dataloader: torch.utils.data.DataLoader, 
@@ -156,22 +158,19 @@ def train(model: torch.nn.Module,
               test_acc: [0.3400, 0.2973]} 
     """
     # Create empty results dictionary
-    results = {"train_loss": [],
-               "train_acc": [],
-               "test_loss": [],
-               "test_acc": []
-    }
+
     
     # Make sure model on target device
     model.to(device)
     model_name = type(model).__name__
-    # Loop through training and testing steps for a number of epochs
     model,start=utils.load_model(model=model,model_type=model_name,device=device)
-
-    for epoch in tqdm(range(start, epochs)):                
-        
-        # Load the model (optional, if you want to test loading)
-        
+    start2=utils.load_random(model_type=model_name,device=device)
+    if(start!=start2):
+        print("[ERROR] Start not the same!")
+        return
+    results=utils.load_loss(model_type=model_name,device=device)
+    # Loop through training and testing steps for a number of epochs
+    for epoch in tqdm(range(start, epochs)):               
         train_loss, train_acc = train_step(model=model,
                                           dataloader=train_dataloader,
                                           loss_fn=loss_fn,
@@ -182,11 +181,10 @@ def train(model: torch.nn.Module,
           loss_fn=loss_fn,
           device=device)
         
-        utils.save_model(model=model,model_type=model_name,epoch=epoch+1,device=device)
-
+  
         # Print out what's happening
         print(
-          f"Epoch: {epoch+1} | "
+          f"\nEpoch: {epoch+1} | "
           f"train_loss: {train_loss:.4f} | "
           f"train_acc: {train_acc:.4f} | "
           f"test_loss: {test_loss:.4f} | "
@@ -198,6 +196,13 @@ def train(model: torch.nn.Module,
         results["train_acc"].append(train_acc)
         results["test_loss"].append(test_loss)
         results["test_acc"].append(test_acc)
+        
+        utils.save_model(model=model,model_type=model_name,epoch=epoch+1,device=device)        
+        utils.save_random(model_name,epoch+1,device)
+        utils.save_loss(results,model_name,device)
 
     # Return the filled results at the end of the epochs
     return results
+
+
+  

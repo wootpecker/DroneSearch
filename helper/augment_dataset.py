@@ -5,12 +5,13 @@ import utils
 
 processed_dir = 'data/datasets_tensor/'
 SIMULATIONS = ["01_Winter", "02_Spring", "03_Summer", "04_Autumn"]
+#SIMULATIONS = ["01_Winter"]
 
 def main():
-    create_augmented_dataset()
+    create_augmented_dataset(amount_samples=8,window_size=[64, 64])
     #test_load(SIMULATIONS[0])
 
-def create_augmented_dataset():
+def create_augmented_dataset(amount_samples=32,window_size=[64, 64]):
     """
     Creates an augmented dataset by processing multiple simulations.
     This function iterates over a predefined list of simulations (SIMULATIONS),
@@ -23,14 +24,14 @@ def create_augmented_dataset():
     all_datasets_GDM = []
     all_datasets_GSL = []
     for simulation in SIMULATIONS:
-        dataset_GDM, dataset_GSL = augment_datasets(simulation, amount_samples=32, window_size=[64, 64])
+        dataset_GDM, dataset_GSL = augment_datasets(simulation, amount_samples=amount_samples, window_size=window_size)
         all_datasets_GDM.append(dataset_GDM)
         all_datasets_GSL.append(dataset_GSL)
 
     all_datasets_GDM = torch.cat(all_datasets_GDM, dim=1)
     all_datasets_GSL = torch.cat(all_datasets_GSL, dim=1)
-
-    utils.save_dataset(all_datasets_GDM, all_datasets_GSL, "all_simulations", augmented=True)
+    return all_datasets_GDM,all_datasets_GSL
+    #utils.save_dataset(all_datasets_GDM, all_datasets_GSL, "all_simulations", augmented=True)
     #return all_datasets_GDM, all_datasets_GSL
     #utils.save_dataset(test_GDM, test_GSL, "test", augmented=True)
 
@@ -85,7 +86,7 @@ def augment_datasets(dataset=SIMULATIONS[0], amount_samples=32, window_size=None
     dataset_GDM_tensor = dataset_GDM_tensor[sorted_indices]
     dataset_GSL_tensor = dataset_GSL_tensor[sorted_indices]
     # Increase the shape of dataset_GSL_tensor to [4096, 32, 2]
-    dataset_GSL_tensor = dataset_GSL_tensor.unsqueeze(1).expand(-1, 32, -1)
+    dataset_GSL_tensor = dataset_GSL_tensor.unsqueeze(1).expand(-1, amount_samples, -1)
     #print(f"dataset_GDM_tensor.shape: {dataset_GDM_tensor.shape}")
     #print(f"stacked_GSL_tensor.shape: {dataset_GSL_tensor.shape}")
     #print(f"dataset_GSL_tensor: {dataset_GSL_tensor}")

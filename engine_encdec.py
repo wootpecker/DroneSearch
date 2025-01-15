@@ -2,7 +2,7 @@
 Contains functions for training and testing a PyTorch model.
 """
 import torch
-
+import utils
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
 
@@ -167,18 +167,20 @@ def train(model: torch.nn.Module,
               test_loss: [1.2641, 1.5706],
               test_acc: [0.3400, 0.2973]} 
     """
-    # Create empty results dictionary
-    results = {"train_loss": [],
-               "train_acc": [],
-               "test_loss": [],
-               "test_acc": []
-    }
+
+
     
     # Make sure model on target device
     model.to(device)
-
+    model_name = type(model).__name__
+    model,start=utils.load_model(model=model,model_type=model_name,device=device)
+    start2=utils.load_random(model_type=model_name,device=device)
+    if(start!=start2):
+        print("[ERROR] Start not the same!")
+        return
+    results=utils.load_loss(model_type=model_name,device=device)
     # Loop through training and testing steps for a number of epochs
-    for epoch in tqdm(range(epochs)):
+    for epoch in tqdm(range(start, epochs)):
         train_loss, train_acc = train_step(model=model,
                                           dataloader=train_dataloader,
                                           loss_fn=loss_fn,
@@ -188,10 +190,11 @@ def train(model: torch.nn.Module,
           dataloader=test_dataloader,
           loss_fn=loss_fn,
           device=device)
+        
 
         # Print out what's happening
         print(
-          f"Epoch: {epoch+1} | "
+          f"\nEpoch: {epoch+1} | "
           f"train_loss: {train_loss:.4f} | "
           f"train_acc: {train_acc:.4f} | "
           f"test_loss: {test_loss:.4f} | "
@@ -203,6 +206,10 @@ def train(model: torch.nn.Module,
         results["train_acc"].append(train_acc)
         results["test_loss"].append(test_loss)
         results["test_acc"].append(test_acc)
+
+        utils.save_model(model=model,model_type=model_name,epoch=epoch+1,device=device)        
+        utils.save_random(model_name,epoch+1,device)
+        utils.save_loss(results,model_name,device)
 
     # Return the filled results at the end of the epochs
     return results

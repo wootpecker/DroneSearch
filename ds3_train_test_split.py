@@ -14,7 +14,7 @@ MODELS = ["VGG", "EncDec"]
 
 
 def main():
-    load_and_split_dataset(SIMULATIONS[0])
+    load_and_split_dataset()
 
 
 def load_and_split_dataset(dataset=ALL_SIMULATIONS, train_ratio=0.8, augmented=True):
@@ -38,17 +38,13 @@ def load_and_split_dataset(dataset=ALL_SIMULATIONS, train_ratio=0.8, augmented=T
     y = y.reshape(-1,2)
     # Calculate the number of training samples
     #print(f"[INFO] X: {X.shape}, y: {y.shape}")
-    train_size = int(train_ratio * len(y))
-    test_size = len(y) - train_size
 
-    # Split the dataset
+    # Random Seed
     utils.seed_generator()
-    train_size = int(train_ratio * len(y))
-    test_size = len(y) - train_size
-
+    
     # Split the dataset
     print(f"[INFO] Dataset loaded and split into train and test sets.")
-    train_size = int(0.8 * X.shape[0])
+    train_size = int(train_ratio * X.shape[0])
     indices = torch.randperm(X.shape[0])
     
     train_indices = indices[:train_size]
@@ -65,13 +61,12 @@ def load_and_split_dataset(dataset=ALL_SIMULATIONS, train_ratio=0.8, augmented=T
     # Create SuperDataset instances
     train_GSL = coordinates_to_grid(train_GSL)
     test_GSL = coordinates_to_grid(test_GSL)
-    train_GDM,train_GSL= transform_dataset(train_GDM,train_GSL)
-    test_GDM,test_GSL= transform_dataset(test_GDM,test_GSL)
+
 
     print(f"[Super] X Train shape: {train_GDM.shape}, y Train shape: {train_GSL.shape}")
     print(f"[Super] X Test shape: {test_GDM.shape}, y Test shape: {test_GSL.shape}")  
     end_time = timer()
-    print(f"[INFO] Total training time: {end_time-start_time:.3f} seconds")
+    print(f"[INFO] Total Transform time: {end_time-start_time:.3f} seconds")
     #return train_GDM, train_GSL, test_GDM, test_GSL
     utils.save_dataset(train_GDM, train_GSL, "train", augmented=True)
     utils.save_dataset(test_GDM, test_GSL, "test", augmented=True)
@@ -95,39 +90,6 @@ def coordinates_to_grid(dataset_GSL):
 
 
 
-
-def transform_dataset(dataset_GDM,dataset_GSL):
-    #dataset_GDM,dataset_GSL = transform_datasets_with_type(dataset_GDM,dataset_GSL,DATASET_TYPES[2],distance=3,pad=2,start_left=True,adequate_input=30)
-    return dataset_GDM,dataset_GSL
-
-
-
-
-
-
-def test_dimesions():
-    dimensions=[64,64]
-    grids=[]
-    sshapes=[]
-    distance=10
-    pad=10
-    all_possibliities = [distance, pad]
-    all_possibliities = [(x, y) for x in range(0,distance) for y in range(0,pad)]
-    for distance,pad in all_possibliities:
-        #grid=generate_coordinates_grid(dimensions,distance=distance,pad=pad)
-        sshape =generate_coordinates_s_shape(dimensions,distance=distance,pad=pad)
-        print(f"[INFO] s-shape len with distance,pad ({distance},{pad}): {len(sshape)}")
-
-    #print(f"[INFO] grid shape: {len(grid)}")
-    #print(f"[INFO] grid: {grid}")
-    #print(f"[INFO] s-shape: {shape}") 
-    
-
-
-    #S-Shape source (distance between cross, offset from border)
-    #Grid (distance between points, offset from border)
-    #Random ()
-    #Edge of plume (start fro\\\m source -> find border )
 
 
 
@@ -278,43 +240,6 @@ def generate_coordinates_random(shuffler,dataset_GDM,distance=3,pad=2):
 
 
 
-
-def find_distinctive_source(dataset_GSL_image):
-    dataset_GSL_image=dataset_GSL_image.numpy()
-    coordinates=[]
-    exists=False
-    for k in range (dataset_GSL_image.shape[0]):
-        print(k)
-        if k>35:
-            break
-        for j in range (dataset_GSL_image.shape[1]):
-            for x in range(dataset_GSL_image.shape[2]):
-                for y in range(dataset_GSL_image.shape[3]):
-                    if(dataset_GSL_image[k,j,x,y]>0):
-                        if coordinates==[]:
-                            coordinates.append([x,y])
-                        for z in coordinates:
-                            if z ==[x,y]:
-                                exists=True
-                                break
-                        if(exists==True):
-                            exists=False
-                        else:
-                            coordinates.append([x,y])
-                            print("x: "+str(x)+"    y: "+str(y))
-    print(f"[INFO] Anzahl an GSL: {len(coordinates)}")
-    print(f"[INFO] GSL vor Sortierung: {coordinates}")
-    coordinates.sort(key=lambda coordinates: coordinates[0])
-    print(f"[INFO] GSL nach Sortierung: {coordinates}")
-    return coordinates
-
-def transform_datasets_with_distinctive_source(dataset_GSL):
-    coordinates=find_distinctive_source(dataset_GSL)
-    coordinates=torch.IntTensor(coordinates)
-    x,y=coordinates[:,0],coordinates[:,1]
-    dataset_GSL=dataset_GSL[:,:,x,y]
-    dataset_GSL = dataset_GSL.reshape(-1, dataset_GSL.shape[-1])
-    return dataset_GSL
 
 
 

@@ -5,7 +5,7 @@ import torch
 from torch import nn 
 import torch.nn.functional as F
 
-MODELS = ["VGG", "EncoderDecoder", "VGGVariation","SimpleEncDec"]
+MODELS = ["VGG", "EncoderDecoder", "VGGVariation","SimpleEncDec"] #UnetEncoderDecoder
 
 def choose_model(model_type=MODELS[0], output_shape=1, device="cuda", input_shape=1):
   """Returns Model from model_type.
@@ -19,10 +19,10 @@ def choose_model(model_type=MODELS[0], output_shape=1, device="cuda", input_shap
   elif(model_type==MODELS[1]):
     output_shape=1
     input
-    model = UnetEncoderDecoder(output_shape=output_shape,input_shape=input_shape).to(device)
-  elif(model_type=="VGGVariation"):
+    model = EncoderDecoder(output_shape=output_shape,input_shape=input_shape).to(device)
+  elif(model_type==MODELS[2]):
     model = VGGVariation(output_shape=output_shape).to(device)
-  elif(model_type=="SimpleEncDec"):
+  elif(model_type==MODELS[3]):
     output_shape=1
     model = SimpleEncDec().to(device)
  
@@ -107,13 +107,13 @@ class VGG(nn.Module):
         )
         self.classifier = nn.Sequential(
           nn.Flatten(),
-          nn.Dropout(0.5),
-          nn.Linear(in_features=FEATURE_MAP[2]*8*8, out_features=4*1024),#needs to be changed according to data
+          nn.Linear(in_features=FEATURE_MAP[2]*8*8, out_features=4096),#needs to be changed according to data
           nn.ReLU(),
           nn.Dropout(0.5),
-          nn.Linear(in_features=4*1024, out_features=2*1024),
+          nn.Linear(in_features=4096, out_features=2048),
           nn.ReLU(),
-          nn.Linear(in_features=2*1024, out_features=output_shape)
+          nn.Dropout(0.5),          
+          nn.Linear(in_features=2048, out_features=output_shape)
         )
     
     def forward(self, x: torch.Tensor):
@@ -132,7 +132,7 @@ class VGG(nn.Module):
 
 
 
-class UnetEncoderDecoder(nn.Module):
+class EncoderDecoder(nn.Module):
     """Creates the VGGVariation architecture based on input with at least 24*24 input.
     Args:
     input_shape(int): An integer indicating number of input channels (default 1 channel).
@@ -172,11 +172,10 @@ class UnetEncoderDecoder(nn.Module):
         nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(),
-        nn.Dropout(self.dropout),
+        nn.Dropout2d(self.dropout),
         nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(),
-        nn.Dropout(self.dropout)
     )
 
     def forward(self, x: torch.Tensor):

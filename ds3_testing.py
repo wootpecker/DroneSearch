@@ -1,6 +1,6 @@
 import os
 import moviepy.video.io.ImageSequenceClip
-import ds2_augment_dataset
+import old.ds2_augment_dataset as ds2_augment_dataset
 import utils
 import cv2
 from pathlib import Path
