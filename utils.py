@@ -10,6 +10,7 @@ import math
 import os
 import numpy
 import shutil
+import logging
 
 MODEL_TYPES = ["VGG", "EncoderDecoder", "VGGVariation"]
 
@@ -38,9 +39,10 @@ def save_dataset(dataset_GDM,dataset_GSL,dataset,augmented=False):
     target_dir_path = Path(f"data/datasets_tensor/")
   target_dir_path.mkdir(parents=True, exist_ok=True) 
   torch.save({'X': dataset_GDM, 'y':dataset_GSL},f"{target_dir_path}/{dataset}.pt")
-  print(f"[INFO] Dataset_GDM shape: {dataset_GDM.shape}")  
-  print(f"[INFO] Dataset_GSL shape: {dataset_GSL.shape}")  
-  print(f"[SAVE] Dataset saved at: {target_dir_path}\{dataset}.pt")
+  logging.info(f"Dataset_GDM shape: {dataset_GDM.shape}")
+  logging.info(f"Dataset_GSL shape: {dataset_GSL.shape}")
+  logging.info(f"[SAVE] Dataset saved at: {target_dir_path}\{dataset}.pt")
+
 
 
 def load_dataset(dataset_name, augmented=False):
@@ -51,9 +53,9 @@ def load_dataset(dataset_name, augmented=False):
   dataset = torch.load(f"{target_dir_path}\{dataset_name}.pt",weights_only=True)
   dataset_GDM = dataset['X']
   dataset_GSL = dataset['y']
-  print(f"[INFO] Dataset_GDM shape: {dataset_GDM.shape}")  
-  print(f"[INFO] Dataset_GSL shape: {dataset_GSL.shape}")  
-  print(f"[LOAD] Dataset was loaded from: {target_dir_path}\{dataset_name}.pt")
+  logging.info(f"Dataset_GDM shape: {dataset_GDM.shape}")
+  logging.info(f"Dataset_GSL shape: {dataset_GSL.shape}")
+  logging.info(f"[LOAD] Dataset was loaded from: {target_dir_path}\{dataset_name}.pt")  
   return dataset_GDM,dataset_GSL
 
 
@@ -87,7 +89,7 @@ def save_image(image,index, title=""):
   target_dir_path = Path(f"data/images")
   target_dir_path.mkdir(parents=True, exist_ok=True) 
   plt.savefig(f"{target_dir_path}/{title}.png")
-  print(f"[SAVE] Image saved at: {target_dir_path}\{title}.png")
+  logging.info(f"[SAVE] Image saved at: {target_dir_path}\{title}.png")  
   plt.close(fig)
   #fig, ax = plt.subplots()
   #ax.imshow(image, cmap='viridis')
@@ -122,6 +124,7 @@ def plot_more_images(images, title="", save=False):
       target_dir_path = Path(f"data/images")
       target_dir_path.mkdir(parents=True, exist_ok=True) 
       plt.savefig(f"{target_dir_path}/{title}.png")
+      logging.info(f"[SAVE] Image saved at: {target_dir_path}\{title}.png")        
     else:
       plt.show()
 
@@ -149,7 +152,7 @@ def save_model(model: torch.nn.Module, model_type: str, epoch=None, device="cuda
   model_save_path = target_dir_path / model_name
 
   # Save the model state_dict()
-  print(f"[SAVE] Saving model to: {model_save_path}")
+  logging.info(f"[SAVE] Saving model to: {model_save_path}")       
   torch.save(obj=model.state_dict(), f=model_save_path)
 
 
@@ -180,7 +183,7 @@ def load_model(model: torch.nn.Module, model_type: str, device="cuda"):
   model = model.to(device)
 
   # Save the model state_dict()
-  print(f"[LOAD] Loading model from: {model_load_path}")
+  logging.info(f"[LOAD] Loading model from: {model_load_path}")
   return model,start
 
 
@@ -214,7 +217,7 @@ def save_random(model_type: str, epoch=None, device="cuda"):
   model_save_path = target_dir_path / model_name
 
   # Save the model state_dict()
-  print(f"[SAVE] Saving Random State to: {model_save_path}")
+  logging.info(f"[SAVE] Saving Random State to: {model_save_path}")
   torch.save(rng_state_dict, f=model_save_path)
 
 
@@ -251,7 +254,7 @@ def load_random(model_type: str, epoch=None, device="cuda"):
   numpy.random.set_state(rng_state_dict['numpy_rng_state'])
   random.setstate(rng_state_dict['py_rng_state'])
   # Save the model state_dict()
-  print(f"[LOAD] Loading Random State from: {model_load_path}")
+  logging.info(f"[LOAD] Loading Random State from: {model_load_path}")  
   return start
 
     
@@ -322,7 +325,7 @@ def save_loss(results,model_type: str, device="cuda"):
   file_save_path = target_dir_path / file_name
 
   # Save the Loss
-  print(f"[SAVE] Saving Loss to: {file_save_path}")
+  logging.info(f"[SAVE] Saving Loss to: {file_save_path}")  
   torch.save(obj=results, f=file_save_path)
 
 
@@ -356,7 +359,8 @@ def load_loss(model_type: str, device="cuda"):
 
 
   results=torch.load(f=file_load_path,weights_only=True)
-  print(f"[LOAD] Loading Loss Results from: {file_load_path}")
+  logging.info(f"[LOAD] Loading Loss Results from: {file_load_path}")  
+
   return results
 
 
@@ -438,13 +442,13 @@ def reset_training(model_type:str):
   for folder in folder_dir_path:
     try:
         shutil.rmtree(folder)
-        print(f"Folder '{folder}' deleted successfully.")
+        logging.info(f"[RESET] Folder '{folder}' deleted successfully.")  
     except FileNotFoundError:
-        print(f"Folder '{folder}' does not exist.")
+        logging.info(f"[RESET] Folder '{folder}' does not exist.")  
     except PermissionError:
-        print(f"Permission denied to delete '{folder}'.")
-    except Exception as e:
-        print(f"An error occurred: {e}")   
+        logging.info(f"[RESET] Permission denied to delete '{folder}'.") 
+    except Exception as e:   
+        logging.info(f"[RESET] An error occurred: {e}.") 
 
 def reset_all():
   for model in MODEL_TYPES:

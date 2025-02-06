@@ -2,6 +2,7 @@ import math
 import numpy as np
 import torch
 import utils
+import logging
 
 processed_dir = 'data/datasets_tensor/'
 SIMULATIONS = ["01_Winter", "02_Spring", "03_Summer", "04_Autumn"]
@@ -21,6 +22,7 @@ def create_augmented_dataset(amount_samples=32,window_size=[64, 64]):
     Returns:
         None
     """
+    logging.info(f"[AUGMENT] Augmenting Dataset with Amount Samples: {amount_samples}, Window Size: {window_size}")
     all_datasets_GDM = []
     all_datasets_GSL = []
     for simulation in SIMULATIONS:
@@ -66,7 +68,7 @@ def augment_datasets(dataset=SIMULATIONS[0], amount_samples=32, window_size=None
     #test_coordinates=torch.tensor(test_coordinates).reshape(180,151,2)
     #print(f"test_coordinates: {test_coordinates[0]}, \ntest_coordinates.shape: {test_coordinates.shape}")
 
-    mapping = create_mapping(all_coordinates)
+    mapping = create_mapping(all_coordinates=all_coordinates,window_size=window_size)
     stacked_GDM_windows = []
     stacked_GSL = []
     for i in range(len(mapping)):
@@ -78,6 +80,8 @@ def augment_datasets(dataset=SIMULATIONS[0], amount_samples=32, window_size=None
                 window = extract_window(dataset_GDM[i][sample].unsqueeze(-1), window_size=window_size, source_location=all_coordinates[x][y], new_location=map)
                 stacked_GDM_windows.append(window)
             stacked_GSL.append(map)
+    #print(f"window_size: {window.shape()}")
+    dataset_GDM_tensor = torch.stack(stacked_GDM_windows)
     dataset_GDM_tensor = torch.stack(stacked_GDM_windows).reshape(window_size[0]*window_size[1], amount_samples, window_size[0], window_size[1])
     dataset_GSL_tensor = torch.tensor(stacked_GSL).reshape(-1, 2)
     # Sort dataset_GDM_tensor and dataset_GSL_tensor based on the first (x) and then the second (y) values of dataset_GSL_tensor
@@ -132,7 +136,7 @@ def extract_window(tensor, window_size=(64, 64), source_location=(49, 42), new_l
     ]
     return window
 
-def create_mapping(all_coordinates):
+def create_mapping(all_coordinates,window_size=[64,64]):
     """
     Create a mapping from the original gas source coordinates to the new coordinates.
     
@@ -142,13 +146,13 @@ def create_mapping(all_coordinates):
     Returns:
         np.array: The mapping from the original gas source coordinates to the new coordinates.
     """
-    x_ceil = math.ceil(64/6)
-    y_ceil = math.ceil(64/5)
+    x_ceil = math.ceil(window_size[0]/6)
+    y_ceil = math.ceil(window_size[1]/5)
     mapping = []
     for x in range(len(all_coordinates)):
-        x_range = range(x_ceil * x, min(x_ceil * (x + 1), 64))
+        x_range = range(x_ceil * x, min(x_ceil * (x + 1), window_size[0]))
         for y in range(len(all_coordinates[x])):
-            y_range = range(y_ceil * y, min(y_ceil * (y + 1), 64))
+            y_range = range(y_ceil * y, min(y_ceil * (y + 1), window_size[1]))
             map = [[i, j] for i in x_range for j in y_range]
             mapping.append(map)
             #print(f"all_coordinates[{x}][{y}]: {all_coordinates[x][y]}")
