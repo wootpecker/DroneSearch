@@ -1,4 +1,5 @@
 data/
 old/
 model/
-logs/
+/logs/*
+!logs/logger.py
