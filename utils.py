@@ -302,7 +302,6 @@ def plot_loss_curves(results: Dict[str, List[float]]):
 
 
 
-
 def save_loss(results,model_type: str, device="cuda"):
   """Saves a PyTorch model to a target directory.
   Args:
