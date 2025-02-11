@@ -6,11 +6,6 @@ from torch.utils import data
 from timeit import default_timer as timer 
 import logging
 
-DATASET_TYPES=["Distinctive","Flattened","S-Shape", "Grid", "Random", "Edge","EncoderDecoder"]
-DATASETS=["train","valid","test"]
-SIMULATIONS = ["01_Winter", "02_Spring", "03_Summer", "04_Autumn"] 
-ALL_SIMULATIONS = "all_simulations"
-MODELS = ["VGG", "EncDec"]
 
 
 def main():
@@ -89,19 +84,6 @@ def coordinates_to_grid(dataset_GSL, window_size=[64,64]):
         x, y = dataset_GSL[i]
         grid[i,0, x, y] = 1
     return torch.FloatTensor(grid)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 if __name__ == "__main__":
     main()

@@ -2,6 +2,10 @@ import os
 import numpy as np
 import torch
 import utils
+#from .. import utils
+import logging
+from tqdm.auto import tqdm
+from tqdm import *
 
 # Define the directory where your simulation files are located
 # old: source_dir = 'raw/sim_WS29'
@@ -28,31 +32,37 @@ def create_dataset_tensor(log_normalize=True, plume_threshold=10):
     Prints:
     """
     directories = [d for d in os.listdir(SOURCE_DIR) if os.path.isdir(os.path.join(SOURCE_DIR, d))]
-    print(directories)
-    
-    for folder in directories: 
-        count = 0       
-        print(folder)
-        path_to_folder = os.path.join(SOURCE_DIR, folder)
-        datasets = []
-        for filename in os.listdir(path_to_folder):
-            filepath = os.path.join(path_to_folder, filename)
-            dataset = transform_to_dataset(filepath, sample_height=180, plume_threshold=plume_threshold)
-            datasets.append(dataset)
+    #print(directories)
+    logging.info(f"Folderlist: {directories} (Should be one for each season or wind simulation)")
+    #for batch, (X, y) in tqdm(enumerate(test_dataloader), desc="Working", total=len(test_dataloader)):
+    with tqdm(directories, position=tqdm._get_free_pos(),leave=False, desc=f'Working on directory: ', total=len(directories)) as folder_range:
+    #for folder in tqdm(directories,position=0, desc=f"Working on directory: ", total=len(directories)):                
+        for folder in folder_range:
+            #count = 0       
+            logging.info(f"Foldername: {folder}")
+            path_to_folder = os.path.join(SOURCE_DIR, folder)
+            datasets = []
+            files=os.listdir(path_to_folder)
+            filename=None
+            for filename in tqdm(files,position=tqdm._get_free_pos(),leave=False, desc=f"Working on files: ", total=len(files)): 
+                filepath = os.path.join(path_to_folder, filename)
+                dataset = transform_to_dataset(filepath, sample_height=180, plume_threshold=plume_threshold)
+                datasets.append(dataset)
+                logging.info(f"Filename: {filename}")
 
-            print(filename)
-            # if count > 2:
-            #     break
-            # count += 1
+                #print(filename)
+                #if count > 1:
+                #     break
+                #count += 1
 
-        datasets = np.array(datasets)
-        if log_normalize:
-            datasets = normalize_dataset(datasets)
-        # all_files.append(datasets)
-        datasets = torch.FloatTensor(datasets)
-        unique_positions = find_max_sequence(datasets)
-        utils.save_dataset(datasets, unique_positions, folder)
-        # break
+            datasets = np.array(datasets)
+            if log_normalize:
+                datasets = normalize_dataset(datasets)
+            # all_files.append(datasets)
+            datasets = torch.FloatTensor(datasets)
+            unique_positions = find_max_sequence(datasets)
+            utils.save_dataset(datasets, unique_positions, folder)
+            # break
 
 
 def transform_to_dataset(input_file, sample_height=180, plume_threshold=10):
@@ -78,7 +88,7 @@ def transform_to_dataset(input_file, sample_height=180, plume_threshold=10):
         raise ValueError("[ERROR] The total number of lines is not divisible by the sample height.")
     
     num_samples = total_lines // sample_height
-    plume_threshold=0
+    #plume_threshold=0
     # Group data into a sequence of samples
     dataset = []
     for i in range(plume_threshold * 2, num_samples):
@@ -86,8 +96,8 @@ def transform_to_dataset(input_file, sample_height=180, plume_threshold=10):
         end = start + sample_height
         sample = data[start:end]
         dataset.append(np.array(sample))
-        if i <3:
-            print(f"x: {np.array(sample).argmax()//151}, y: {np.array(sample).argmax()%151}")
+        #if i <3:
+            #print(f"x: {np.array(sample).argmax()//151}, y: {np.array(sample).argmax()%151}")
     
     return np.array(dataset)
 
@@ -102,9 +112,9 @@ def normalize_dataset(data):
     Returns:
         np.array: The normalized dataset.
     """
-    #epsilon = 1e-10  # Small constant to avoid log(0)
-    #log_data = np.maximum(np.log(data + epsilon), 0)
-    log_data = np.maximum(np.log(data), 0)
+    epsilon = 1e-10  # Small constant to avoid log(0)
+    log_data = np.maximum(np.log(data + epsilon), 0)
+    #log_data = np.maximum(np.log(data), 0)
     return (log_data - np.min(log_data)) / (np.max(log_data) - np.min(log_data))
 
 
@@ -133,9 +143,9 @@ def find_max_sequence(dataset):
         sorted_indices = torch.argsort(counts, descending=True)
         sorted_positions = unique_positions[sorted_indices]
         sorted_counts = counts[sorted_indices]
-        print(f"Sample {sample_idx}:")
-        for position, count in zip(sorted_positions[:3].tolist(), sorted_counts[:3].tolist()):
-            print(f"Position {position} appears {count} times as the max.")
+        logging.info(f"Sample: {sample_idx}")
+        for position, count in zip(sorted_positions[:3].tolist(), sorted_counts[:3].tolist()):            
+            logging.info(f"Position {position} appears {count} times as the max.")
         unique_count.append(sorted_positions[0].tolist())
     unique_counts = torch.tensor(np.array(unique_count))
     return unique_counts

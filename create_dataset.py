@@ -8,12 +8,12 @@ SOURCE_DIR = 'data/original/'
 
 
 def main():
-    #logger.logging_config(logs_save=False)
-    #create_dataset(save=False)
+    logger.logging_config(logs_save=True,filename="initialize_dataset")
+    create_dataset(save=False)
     pass
     
-def create_dataset(amount_samples=8,window_size=[64, 64],train_ratio=0.8, save=True):
-  #logger.logging_config(logs_save=False)
+def create_dataset(amount_samples=8,window_size=[64, 64],train_ratio=0.8, save=False):
+  #logger.logging_config(logs_save=save)
   initialize()
   train_GDM,train_GSL,test_GDM,test_GSL=transformation(amount_samples=amount_samples,window_size=window_size,train_ratio=train_ratio, save=save)  
   return train_GDM,train_GSL,test_GDM,test_GSL
@@ -26,7 +26,7 @@ def initialize():
   target_dir_path.mkdir(parents=True, exist_ok=True)
   files=os.listdir(target_dir_path)
   if len(files)==0:
-    logging.info("INITIALIZE")
+    logging.info("INITIALIZING DATASET")
     original_dataset_to_tensor.create_dataset_tensor(log_normalize=True, plume_threshold=10)
 
 def transformation(amount_samples=8,window_size=[64, 64],train_ratio=0.8,save=True):

@@ -3,10 +3,11 @@ import numpy as np
 import torch
 import utils
 import logging
+import os
 
-processed_dir = 'data/datasets_tensor/'
-SIMULATIONS = ["01_Winter", "02_Spring", "03_Summer", "04_Autumn"]
-#SIMULATIONS = ["01_Winter"]
+SOURCE_DIR='data/original/'
+SIMULATIONS = [d for d in os.listdir(SOURCE_DIR) if os.path.isdir(os.path.join(SOURCE_DIR, d))]
+
 
 def main():
     create_augmented_dataset(amount_samples=8,window_size=[64, 64])
