@@ -27,7 +27,7 @@ MODEL_TYPES = ["VGG", "EncoderDecoder", "VGGVariation"]
 
 HYPER_PARAMETERS = {
               "SAVE_DATASET": False,
-               "TRANSFORM": False,
+               "TRANSFORM": True,
                "MODEL_TYPES": ["VGG", "EncoderDecoder", "VGGVariation"],
                "LOGS_SAVE": True,
                "AMOUNT_SAMPLES": 16,
@@ -206,6 +206,7 @@ def reshape_tensor(y_list,y_logit_list,y_preds_percent):
 
 
 def print_metrics(y_pred,y_list,y_preds_percent,classes,model_type):
+    logging.info(f"Calculating Metrics and Plotting:")
     if(model_type==MODEL_TYPES[1]):
         y_pred_index = torch.argmax(y_preds_percent.view(y_preds_percent.shape[0], -1), dim=1)  # [batch]
         y_list_index = torch.argmax(y_list.view(y_list.shape[0], -1), dim=1)  # [batch]
@@ -305,9 +306,9 @@ def topx_accuracy(y_true_list, y_predicted_list, amount_of_values):
     matches= torch.any(y_true_indices[:,None] == topx_indices, dim=1)
     accuracy = matches.float().mean().item()
     mean_percentage=torch.mean(topx_values[:,amount_of_values-1].float())
-    return mean_percentage,accuracy
+    return mean_percentage.float().item(),accuracy
 
-
+#test_topx()
 
 
 
@@ -335,8 +336,9 @@ def approximate_accuracy(y_true_list, y_predicted_list, height, distance):
         #accuracy = (matches.sum().item() / len(y_true))
         accuracies+=matches
     
-    
-    return accuracies/len(y_true_list)
+    accuracies=accuracies/len(y_true_list)
+    accuracies=accuracies.float().item()
+    return accuracies
 
 
 def plot_accuracy_curves(approx_y_true,approx_y_pred,topx_y_true,topx_y_pred,classes,plot=False):

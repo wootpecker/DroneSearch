@@ -28,8 +28,8 @@ HYPER_PARAMETERS = {
 
 
 TRAINING_PARAMETERS = {
-              "NUM_EPOCHS": 50,
-               "BATCH_SIZE": 32,
+              "NUM_EPOCHS": 10,
+               "BATCH_SIZE": 128,
                "LEARNING_RATE": 0.001,
                "LOAD_SEED": 16923,
                "TRAIN_SEED": 42
@@ -48,7 +48,7 @@ def main():
   logs_save=HYPER_PARAMETERS['LOGS_SAVE']
   logger.logging_config(logs_save=logs_save,amount_samples=HYPER_PARAMETERS['AMOUNT_SAMPLES'], transform=transform, model_type=model_type, window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
 
-  utils.reset_training(model_type=model_type)  
+  #utils.reset_training(model_type=model_type)  
   train_all_models(model_type=model_type, transform=transform)
    
 
