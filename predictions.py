@@ -27,7 +27,7 @@ MODEL_TYPES = ["VGG", "EncoderDecoder", "VGGVariation"]
 
 HYPER_PARAMETERS = {
               "SAVE_DATASET": False,
-               "TRANSFORM": True,
+               "TRANSFORM": False,
                "MODEL_TYPES": ["VGG", "EncoderDecoder", "VGGVariation"],
                "LOGS_SAVE": True,
                "AMOUNT_SAMPLES": 16,
@@ -171,15 +171,15 @@ def make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
     for j in range(arr.shape[0]):
         i=random_samples[j]
         #print(i)
-        arr[j,0].imshow(X_list[i].squeeze(0).unsqueeze(-1).numpy())
+        arr[j,0].imshow(X_list[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
         arr[j,0].set(xlabel=f"Sample: {i}, X (Input of Model)") 
         max_index = y_list[i].argmax().item()
         max_y, max_x = divmod(max_index,y_list[i].shape[-1])
-        arr[j,1].imshow(y_list[i].squeeze(0).unsqueeze(-1).numpy())
+        arr[j,1].imshow(y_list[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
         arr[j,1].set(xlabel=f"y (Target), Max Value at ({max_x}, {max_y})")
-        arr[j,2].imshow(y_logit_list[i].squeeze(0).unsqueeze(-1).numpy())
+        arr[j,2].imshow(y_logit_list[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
         arr[j,2].set(xlabel=f"y_logit (Output of Model)")
-        arr[j,3].imshow(y_preds_percent[i].squeeze(0).unsqueeze(-1).numpy())
+        arr[j,3].imshow(y_preds_percent[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
         #arr[j,3].set(xlabel=f"Sample: {i}, y_preds_percent")
         max_value = y_preds_percent[i].max().item()
         max_index = y_preds_percent[i].argmax().item()
