@@ -21,30 +21,20 @@ import random
 import pandas as pd
 import math
 import logging
+import ds4_train_model
+from pathlib import Path
 # Set device
 device = "cuda" if torch.cuda.is_available() else "cpu"
-MODEL_TYPES = ["VGG", "EncoderDecoder", "VGGVariation"]
-
-HYPER_PARAMETERS = {
-              "SAVE_DATASET": False,
-               "TRANSFORM": False,
-               "MODEL_TYPES": ["VGG", "EncoderDecoder", "VGGVariation"],
-               "LOGS_SAVE": True,
-               "AMOUNT_SAMPLES": 16,
-               "WINDOW_SIZE": [64,64]
-  }
+MODEL_TYPES = ["VGG8", "UnetS", "VGGVariation"]
 
 
+HYPER_PARAMETERS = ds4_train_model.HYPER_PARAMETERS
+TRAINING_PARAMETERS = ds4_train_model.TRAINING_PARAMETERS
+HYPER_PARAMETERS['AMOUNT_SAMPLES'] = 16
+HYPER_PARAMETERS['TRANSFORM'] = True                           #transformed data
 
-TRAINING_PARAMETERS = {
-              "NUM_EPOCHS": 50,
-               "BATCH_SIZE": 128,
-               "LEARNING_RATE": 0.001,
-               "LOAD_SEED": 16923,
-               "TRAIN_SEED": 42
-  }
-
-MODEL_TO_TEST=(HYPER_PARAMETERS['MODEL_TYPES'][1],HYPER_PARAMETERS['MODEL_TYPES'][2])
+MODEL_TO_TEST=[HYPER_PARAMETERS['MODEL_TYPES'][0]]#,HYPER_PARAMETERS['MODEL_TYPES'][1]]
+#MODEL_TO_TEST=[HYPER_PARAMETERS['MODEL_TYPES'][1]]
 
 
 def main():
@@ -65,19 +55,40 @@ def main():
 
 
 def plot_model_accuracies(result_dic):
-    accuracy_amount =  range(1,11)
-    # Setup a plot 
+    
+    target_dir_path = Path(f"results")
+    target_dir_path.mkdir(parents=True, exist_ok=True)
+    target_dir_path = Path(f"results/images")
+    target_dir_path.mkdir(parents=True, exist_ok=True)
+    
+
+    plt.figure(figsize=(15, 7))
+    for x in range(len(result_dic)):
+        model=result_dic[x]
+        accuracy_amount =  range(0,len(model['approximate_accuracy']))
+        plt.plot(accuracy_amount, model['approximate_accuracy'], label=f'{MODEL_TO_TEST[x]} Approximate Accuracy', color=f'C{x}')
+    # plt.plot(accuracy_amount, mean_percentage, label='mean_percentage')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Radius of Approximation')
+    plt.legend()
+    plt.savefig(f'results/images/approximate_accuracy.png')
+    #plt.show()
+
     plt.figure(figsize=(15, 7))
     for x in range(len(result_dic)):
         model=result_dic[x]
         accuracy_amount =  range(1,len(model['approximate_accuracy'])+1)
-        plt.plot(accuracy_amount, model['approximate_accuracy'], label=f'{MODEL_TO_TEST[x]} Approximate Accuracy', color=f'C{x}')
-        plt.plot(accuracy_amount, model['topx_accuracy'], label=f'{MODEL_TO_TEST[x]} Top Values Accuracy', linestyle='--', color=f'C{x}')
+        plt.plot(accuracy_amount, model['topx_accuracy'], label=f'{MODEL_TO_TEST[x]} Top N Accuracy', color=f'C{x}')
     # plt.plot(accuracy_amount, mean_percentage, label='mean_percentage')
-    plt.title('Accuracy')
+    plt.ylabel('Accuracy')
     plt.xlabel('Accuracy Distance')
     plt.legend()
-    plt.show()
+    plt.savefig(f'results/images/topx_accuracy.png')
+    #plt.show()
+
+
+
+
     plt.figure(figsize=(15, 7))
     for x in range(len(result_dic)):
         model=result_dic[x]
@@ -88,7 +99,9 @@ def plot_model_accuracies(result_dic):
     plt.title('Confidence Comparison')
     plt.xlabel('Accuracy Distance')
     plt.legend()
-    plt.show()    
+    plt.savefig(f'results/images/mean_percentage.png')
+
+    #plt.show()    
     return result_dic
 
 def do_predictions(model_type= "VGG"):
@@ -110,6 +123,9 @@ def do_predictions(model_type= "VGG"):
     utils.seed_generator(SEED=TRAINING_PARAMETERS['LOAD_SEED'])
     y_pred,y_list,X_list,y_logit_list,y_preds_percent=make_prediction_all_results(model_type=model_type,model=model,test_dataloader=test_dataloader)
     accuracy_results=print_metrics(y_pred,y_list,y_preds_percent,classes,model_type)
+    benchmark_similarity,benchmark_accuracy=calculate_max_accuracy(X_list,y_list,y_preds_percent)
+    accuracy_results['benchmark_accuracy']=benchmark_accuracy
+    accuracy_results['benchmark_similarity']=benchmark_similarity
     y_list,y_logit_list,y_preds_percent=reshape_tensor(y_list=y_list,y_logit_list=y_logit_list,y_preds_percent=y_preds_percent)
     make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent)  
     return accuracy_results
@@ -159,37 +175,61 @@ def make_prediction_all_results(model,test_dataloader,model_type):
     
 
 
-
-
 def make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
     #def show_as_image_sequence_batch(dataset, predicted_dataset):
     #results=[X_list,y_list,y_logit_list,y_preds_percent]
     y_list,y_logit_list,y_preds_percent=reshape_tensor(y_list,y_logit_list,y_preds_percent)
-    size=[4,4]
-    f, arr = plt.subplots(size[0],size[1]) 
-    random_samples=random.sample(range(X_list.shape[0]),k=size[0])
+    size=[5,4]
+    fig_width = 4 * 2  # 4 columns × 2 inches per image
+    fig_height = 5 * 2  # 5 rows × 2 inches per image
+    f, arr = plt.subplots(size[0],size[1], figsize=(fig_width, fig_height)) 
+    random_samples=random.sample(range(X_list.shape[0]),k=5)
     for j in range(arr.shape[0]):
         i=random_samples[j]
         #print(i)
-        arr[j,0].imshow(X_list[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
-        arr[j,0].set(xlabel=f"Sample: {i}, X (Input of Model)") 
-        max_index = y_list[i].argmax().item()
-        max_y, max_x = divmod(max_index,y_list[i].shape[-1])
+        arr[j,0].imshow(X_list[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")        
         arr[j,1].imshow(y_list[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
-        arr[j,1].set(xlabel=f"y (Target), Max Value at ({max_x}, {max_y})")
+        y_target,x_target=divmod(y_list[i].argmax().item(),X_list[i].shape[-1])
         arr[j,2].imshow(y_logit_list[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
-        arr[j,2].set(xlabel=f"y_logit (Output of Model)")
-        arr[j,3].imshow(y_preds_percent[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
-        #arr[j,3].set(xlabel=f"Sample: {i}, y_preds_percent")
-        max_value = y_preds_percent[i].max().item()
-        max_index = y_preds_percent[i].argmax().item()
-        max_y, max_x = divmod(max_index, y_preds_percent[i].shape[-1])
-        arr[j,3].set(xlabel=f"Predicted Percentages, Max Value: {max_value:.2f} at ({max_x}, {max_y})")
+        #y_preds_percent[i]=torch.sigmoid(y_logit_list[i])
+        y_pred,x_pred=divmod(y_preds_percent[i].argmax().item(),X_list[i].shape[-1])   
+        arr[j,3].imshow(y_preds_percent[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")        
+        if(y_target==y_pred and x_target==x_pred):
+            color='green'
+        else:
+            color='red'     
+    
+        if(j==0):
+            arr[j,0].set_title(f"X (Input of Model)")
+            arr[j,0].set(xlabel=f"x (in dm)")
+            arr[j,0].set(ylabel=f"y (in dm)")
+            arr[j,1].set_title(f"y (Target)")
+            arr[j,2].set_title(f"y_logit (Output of Model)")
+            arr[j,3].set_title(f"Predicted Percentages")
+        else:
+            arr[j,0].set_xticks([]) 
+            arr[j,0].set_yticks([]) 
+        arr[j,1].set_xlabel(f"Max Value at ({x_target},{y_target})")
+        arr[j,3].set_xlabel(f"Max Value {y_preds_percent[i].max():.2f} at ({x_pred},{y_pred})", color=color)                 
+        arr[j,1].set_xticks([]) 
+        arr[j,1].set_yticks([])
+        arr[j,2].set_xticks([]) 
+        arr[j,2].set_yticks([]) 
+        arr[j,3].set_xticks([]) 
+        arr[j,3].set_yticks([])               
         #plt.xticks([])
         #plt.yticks([])
-    # f.tight_layout()
+
+
+    f.subplots_adjust(hspace =0.4)
+   # f.tight_layout()
     plt.subplots_adjust(hspace =0.4)
     plt.show()
+
+
+
+
+
 
 def reshape_tensor(y_list,y_logit_list,y_preds_percent):
     if(len(y_list.shape)>2):
@@ -311,6 +351,27 @@ def topx_accuracy(y_true_list, y_predicted_list, amount_of_values):
 #test_topx()
 
 
+def calculate_max_accuracy(X_list,y_list,y_preds_percent):
+    accuracy_max=0
+    accuracy_max_pred=0
+    x_max_index = torch.argmax(X_list.view(X_list.shape[0], -1), dim=1)  # [batch]
+    y_pred_index = torch.argmax(y_preds_percent.view(y_preds_percent.shape[0], -1), dim=1) 
+    y_index = torch.argmax(y_list.view(y_list.shape[0], -1), dim=1) 
+    for x in range(x_max_index.shape[0]):
+        if(x_max_index[x]==y_index[x]):
+            accuracy_max+=1
+        if(x_max_index[x]==y_pred_index[x]):
+            accuracy_max_pred+=1
+    accuracy_max=accuracy_max/len(X_list)
+    accuracy_max_pred=accuracy_max_pred/len(X_list)
+    print(f"X_max with y_true: {accuracy_max} | X_max with y_pred: {accuracy_max_pred}")
+    approx_accuracies=[]
+    for x in range(1,10):
+        approx_acc=approximate_accuracy(y_index,x_max_index,64,x-1)
+        approx_accuracies.append(approx_acc)
+        #print(f"approx_acc: {approx_acc}")
+    #print(f"approx_acc: {approx_acc}")
+    return accuracy_max_pred,approx_accuracies
 
 def approximate_accuracy(y_true_list, y_predicted_list, height, distance):
     accuracies = 0
@@ -353,8 +414,10 @@ def plot_accuracy_curves(approx_y_true,approx_y_pred,topx_y_true,topx_y_pred,cla
     """
     results = {"approximate_accuracy": [],
                "topx_accuracy": [],
-               "mean_percentage": []
-    }
+               "mean_percentage": [],
+               "benchmark_accuracy": [],
+               "benchmark_similarity": []}
+    
     start=1
     end=10
     for x in range(start,end):

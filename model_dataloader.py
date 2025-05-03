@@ -6,14 +6,17 @@ from timeit import default_timer as timer
 from torchvision import transforms
 import data_transformations
 import create_dataset
+import matplotlib.pyplot as plt
+from logs import logger
 
-MODELS = ["VGG", "EncoderDecoder", "VGGVariation"]
+MODELS = ["VGG8", "UnetS", "VGGVariation"]
 DATASETS=["train","test"]
 COMMON_TRANSFORM=[transforms.RandomHorizontalFlip(p=1), transforms.RandomVerticalFlip(p=1), data_transformations.RotationTransform(rotation_angle=90),data_transformations.RotationTransform(rotation_angle=180),data_transformations.RotationTransform(rotation_angle=270)]
 COMMON_TRANSFORM_PROB=[0.5, 0.5, 0.25, 0.5, 0.75]#HorizontalFlip(50%),VerticalFlip(50%),Rotation90(25%),Rotation180(25%),Rotation270(25%)
 X_TRANSFORM=[data_transformations.NoiseTransform(),data_transformations.SshapeTransform(),data_transformations.CageTransform(),data_transformations.GridTransform()]
 X_TRANSFORM_PROB=[0.5, 0.4, 0.6, 0.7]#Noise(50%),Sshape(40%),Cage(20%),Grid(10%)
-
+#COMMON_TRANSFORM_PROB=[1,0,0,0,0]
+#X_TRANSFORM_PROB=[0, 0, 0, 0]
 
 
 
@@ -21,20 +24,53 @@ X_TRANSFORM_PROB=[0.5, 0.4, 0.6, 0.7]#Noise(50%),Sshape(40%),Cage(20%),Grid(10%)
 def main():
     #create_dataloader_distinctive(batch_size=16)
     #test()
-    plot_with_classes(model_type=MODELS[0])
+    plot_for_BA(model_type=MODELS[1])
 
  #TESTING:
 
-def plot_with_classes(model_type=MODELS[1]):
+def plot_for_BA(model_type=MODELS[1]):
+    logger.logging_config(logs_save=False)
+    global COMMON_TRANSFORM_PROB, X_TRANSFORM_PROB
+    COMMON_TRANSFORM_PROB = [0, 0, 0, 0, 0]
+    X_TRANSFORM_PROB = [0, 0, 0, 0]
     utils.seed_generator()
-    train_dataset, test_dataset= load_reshape_dataset(model_type=model_type)
-    a=0
-    b=a+15
-    single_x=[]
-    single_y=[]
-    for i in range(a,b):
-        print(f"{i}:")
-        temp=train_dataset.__getitem__(i)
+    train_GDM,train_GSL,test_GDM,test_GSL=create_dataset.create_dataset(amount_samples=1,window_size=[64,64],save=False)
+    train_dataset, test_dataset = load_reshape_dataset(model_type=model_type,transform=True, load=False, train_GDM=train_GDM, train_GSL=train_GSL, test_GDM=test_GDM, test_GSL=test_GSL)
+    #train_dataset, test_dataset= load_reshape_dataset(model_type=model_type, transform=True, load=False)
+    sample_number=4958
+    size=[1,3]
+    fig_width = 3 * 2  # 4 columns × 2 inches per image
+    fig_height =  2  # 5 rows × 2 inches per image
+    f, arr = plt.subplots(size[0],size[1], figsize=(fig_width, fig_height)) 
+    for j in range(arr.shape[0]):
+        #print(i)
+        
+        COMMON_TRANSFORM_PROB=[0,0,0,0,0]
+        if j!=0:        
+            COMMON_TRANSFORM_PROB[j]=1
+        X_TRANSFORM_PROB=[0, 0, 0, 0]
+        sample=train_dataset.__getitem__(sample_number)
+        arr[j].imshow(sample[0].squeeze(0).unsqueeze(-1).numpy(), origin="lower")        
+
+
+
+    f.subplots_adjust(hspace =0.4)
+   # f.tight_layout()
+    plt.subplots_adjust(hspace =0.4)
+    plt.show()
+
+
+
+
+
+
+
+
+
+
+    a=0 
+    b=5
+    if model_type==MODELS[0]:
         max_value = torch.max(temp[0][0])
         print(f"Max value in the dataset: {max_value}")
         if model_type==MODELS[0]:
@@ -50,7 +86,7 @@ def plot_with_classes(model_type=MODELS[1]):
     #z=train_dataset[a:b]
     single_z = []
     print("new dataset test:")
-    train_dataset, test_dataset= load_reshape_dataset(model_type=model_type,transform=False)
+    train_dataset, test_dataset= load_reshape_dataset(model_type=model_type,transform=False, load=False)
     if model_type==MODELS[0]:
         temp_list=[]
         x=[]

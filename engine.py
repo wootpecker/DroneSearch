@@ -134,7 +134,8 @@ def train(model: torch.nn.Module,
           optimizer: torch.optim.Optimizer,
           loss_fn: torch.nn.Module,
           epochs: int,
-          device: torch.device) -> Dict[str, List]:
+          device: torch.device,
+          transform: True) -> Dict[str, List]:
     """Trains and tests a PyTorch model.
 
     Passes a target PyTorch models through train_step() and test_step()
@@ -172,7 +173,7 @@ def train(model: torch.nn.Module,
     elapsed_old=0
     model.to(device)
     model_name = type(model).__name__
-    model,start=utils.load_model(model=model,model_type=model_name,device=device)
+    model,start=utils.load_model(model=model,model_type=model_name,device=device,transform=transform)
     start2=utils.load_random(model_type=model_name,device=device)
     if(start!=start2):
         print("[ERROR] Start not the same!")
@@ -210,7 +211,7 @@ def train(model: torch.nn.Module,
             epoch_duration_str = t.format_interval(epoch_duration)
             logging.info(f"[TRAINING] Elapsed: {elapsed_str} | Epoch Duration: {epoch_duration_str}")
             
-            utils.save_model(model=model,model_type=model_name,epoch=epoch+1,device=device)        
+            utils.save_model(model=model,model_type=model_name,epoch=epoch+1,device=device,transform=transform)        
             utils.save_random(model_name,epoch+1,device)
             utils.save_loss(results,model_name,device)
 

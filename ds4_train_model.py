@@ -13,22 +13,20 @@ from torchvision import transforms
 # Setup hyperparameters
 
 
-MODEL_TYPES = ["VGG", "EncoderDecoder", "VGGVariation"]
-
 
 HYPER_PARAMETERS = {
               "SAVE_DATASET": False,
                "TRANSFORM": True,
-               "MODEL_TYPES": ["VGG", "EncoderDecoder", "VGGVariation"],
+               "MODEL_TYPES": ["VGG8", "UnetS", "VGGVariation"],
                "LOGS_SAVE": True,
-               "AMOUNT_SAMPLES": 16,
+               "AMOUNT_SAMPLES": 1,
                "WINDOW_SIZE": [64,64]
   }
 
 
 
 TRAINING_PARAMETERS = {
-              "NUM_EPOCHS": 10,
+              "NUM_EPOCHS": 20,
                "BATCH_SIZE": 128,
                "LEARNING_RATE": 0.001,
                "LOAD_SEED": 16923,
@@ -43,12 +41,12 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def main():
-  model_type=HYPER_PARAMETERS['MODEL_TYPES'][2]
+  model_type=HYPER_PARAMETERS['MODEL_TYPES'][0]
   transform=HYPER_PARAMETERS['TRANSFORM']
   logs_save=HYPER_PARAMETERS['LOGS_SAVE']
   logger.logging_config(logs_save=logs_save,amount_samples=HYPER_PARAMETERS['AMOUNT_SAMPLES'], transform=transform, model_type=model_type, window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
 
-  #utils.reset_training(model_type=model_type)  
+  utils.reset_training(model_type=model_type)  
   train_all_models(model_type=model_type, transform=transform)
    
 
@@ -90,13 +88,15 @@ s
   #Training + Duration
   utils.seed_generator(SEED=TRAINING_PARAMETERS['TRAIN_SEED'])
   start_time = timer()
-  if(model_type==MODEL_TYPES[1]):
+  if(model_type==HYPER_PARAMETERS['MODEL_TYPES'][1]):
+    #loss_fn = torch.nn.MSELoss()
+    # originally BCEwithLogitsLoss
     loss_fn = torch.nn.BCEWithLogitsLoss()
     logging.info(f"[TRAIN] Loss: {loss_fn}, Optimizer: {type(optimizer).__name__}, Learning Rate: {optimizer.param_groups[0]['lr']}")  
-    mode_results=engine_encdec.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=TRAINING_PARAMETERS['NUM_EPOCHS'], device=device)
+    mode_results=engine_encdec.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=TRAINING_PARAMETERS['NUM_EPOCHS'], device=device, transform=transform)
   else:
     logging.info(f"[TRAIN] Loss: {loss_fn}, Optimizer: {type(optimizer).__name__}, Learning Rate: {optimizer.param_groups[0]['lr']}")  
-    mode_results=engine.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=TRAINING_PARAMETERS['NUM_EPOCHS'], device=device)
+    mode_results=engine.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=TRAINING_PARAMETERS['NUM_EPOCHS'], device=device, transform=transform)
   end_time = timer()
   print(f"[INFO] Total training time: {end_time-start_time:.3f} seconds")
   # Save the model and plot loss curve

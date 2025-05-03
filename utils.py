@@ -12,7 +12,7 @@ import numpy
 import shutil
 import logging
 
-MODEL_TYPES = ["VGG", "EncoderDecoder", "VGGVariation"]
+MODEL_TYPES = ["VGG", "UnetS", "VGGVariation"]
 
 
 
@@ -69,7 +69,7 @@ def plot_image(image, title=""):
         title (str): The title of the plot.
     """
     image=image.squeeze().unsqueeze(-1)
-    plt.imshow(image, cmap='viridis')
+    plt.imshow(image, cmap='viridis', origin='lower')
     plt.title(title)
     plt.show()
 
@@ -115,7 +115,7 @@ def plot_more_images(images, title="", save=False):
     for i, ax in enumerate(axes.flat):
         if i >= len(images):
           break
-        ax.imshow(images[i], cmap='viridis')        
+        ax.imshow(images[i], cmap='viridis', origin='lower')        
         #ax.axis('off')
     plt.suptitle(title)
     plt.tight_layout()
@@ -129,7 +129,7 @@ def plot_more_images(images, title="", save=False):
       plt.show()
 
 
-def save_model(model: torch.nn.Module, model_type: str, epoch=None, device="cuda"):
+def save_model(model: torch.nn.Module, model_type: str, epoch=None, device="cuda", transform=True):
   """Saves a PyTorch model to a target directory.
   Args:
   model: A target PyTorch model to save.
@@ -141,8 +141,15 @@ def save_model(model: torch.nn.Module, model_type: str, epoch=None, device="cuda
   # Create target directory
   target_dir_path = Path(f"model")
   target_dir_path.mkdir(parents=True, exist_ok=True)
-  target_dir_path = Path(f"model/{model_type}")
+  target_dir_path = Path(f"model/original")
   target_dir_path.mkdir(parents=True, exist_ok=True)
+  target_dir_path = Path(f"model/original/{model_type}")
+  target_dir_path.mkdir(parents=True, exist_ok=True)  
+  if transform:
+    target_dir_path = Path(f"model/transform")
+    target_dir_path.mkdir(parents=True, exist_ok=True)    
+    target_dir_path = Path(f"model/transform/{model_type}")
+    target_dir_path.mkdir(parents=True, exist_ok=True)
   # Create model save path
   save_format=".pth"
   if epoch is None:
@@ -157,7 +164,7 @@ def save_model(model: torch.nn.Module, model_type: str, epoch=None, device="cuda
 
 
 
-def load_model(model: torch.nn.Module, model_type: str, device="cuda"):
+def load_model(model: torch.nn.Module, model_type: str, device="cuda", transform=True):
   """Saves a PyTorch model to a target directory.
   Args:
   model: A target PyTorch model to save.
@@ -169,8 +176,17 @@ def load_model(model: torch.nn.Module, model_type: str, device="cuda"):
   # Create target directory
   target_dir_path = Path(f"model")
   target_dir_path.mkdir(parents=True, exist_ok=True)
-  target_dir_path = Path(f"model/{model_type}")
+  target_dir_path = Path(f"model/original")
   target_dir_path.mkdir(parents=True, exist_ok=True)
+  target_dir_path = Path(f"model/original/{model_type}")
+  target_dir_path.mkdir(parents=True, exist_ok=True)  
+  model_setting="original"
+  if transform:
+    target_dir_path = Path(f"model/transform")
+    target_dir_path.mkdir(parents=True, exist_ok=True)    
+    target_dir_path = Path(f"model/transform/{model_type}")
+    target_dir_path.mkdir(parents=True, exist_ok=True)
+    model_setting="transformed"
   files=os.listdir(target_dir_path)
   
   if len(files)==0:
@@ -183,7 +199,7 @@ def load_model(model: torch.nn.Module, model_type: str, device="cuda"):
   model = model.to(device)
 
   # Save the model state_dict()
-  logging.info(f"[LOAD] Loading model from: {model_load_path}")
+  logging.info(f"[LOAD] Loading {model_setting} model from: {model_load_path}")
   return model,start
 
 
@@ -303,14 +319,6 @@ def plot_loss_curves(results: Dict[str, List[float]]):
 
 
 def save_loss(results,model_type: str, device="cuda"):
-  """Saves a PyTorch model to a target directory.
-  Args:
-  model: A target PyTorch model to save.
-  target_dir: A directory for saving the model to.
-  model_name: A filename for the saved model. FileEnding pth will be added
-  Example usage:
-  save_model(model=model_0, target_dir="model", model_name="05_going_modular_tingvgg_model.pth")
-  """
   # Create target directory
   target_dir_path = Path(f"data/loss_curve")
   target_dir_path.mkdir(parents=True, exist_ok=True)
@@ -433,11 +441,14 @@ def test_random_state_differences():
     compare_rng_states(state1,state2)
     print("--------------------------------")
 
-def reset_training(model_type:str):
+def reset_training(model_type:str,transform=True):
   folder_dir_path=[]
   folder_dir_path.append(Path(f"data/random_state/{model_type}"))
   folder_dir_path.append(Path(f"data/loss_curve/{model_type}"))
-  folder_dir_path.append(Path(f"model/{model_type}"))
+  if transform:
+    folder_dir_path.append(Path(f"model/transform/{model_type}"))
+  else:
+    folder_dir_path.append(Path(f"model/original/{model_type}"))
   for folder in folder_dir_path:
     try:
         shutil.rmtree(folder)
@@ -451,7 +462,9 @@ def reset_training(model_type:str):
 
 def reset_all():
   for model in MODEL_TYPES:
-    reset_training(model)
+    reset_training(model, transform=True)
+    reset_training(model, transform=False)
+
 
 
 if __name__ == "__main__":
