@@ -6,3 +6,4 @@ model/
 __pycache__/
 pycache/*
 helper/pycache/*
+results/

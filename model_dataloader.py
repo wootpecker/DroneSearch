@@ -15,8 +15,7 @@ COMMON_TRANSFORM=[transforms.RandomHorizontalFlip(p=1), transforms.RandomVertica
 COMMON_TRANSFORM_PROB=[0.5, 0.5, 0.25, 0.5, 0.75]#HorizontalFlip(50%),VerticalFlip(50%),Rotation90(25%),Rotation180(25%),Rotation270(25%)
 X_TRANSFORM=[data_transformations.NoiseTransform(),data_transformations.SshapeTransform(),data_transformations.CageTransform(),data_transformations.GridTransform()]
 X_TRANSFORM_PROB=[0.5, 0.4, 0.6, 0.7]#Noise(50%),Sshape(40%),Cage(20%),Grid(10%)
-#COMMON_TRANSFORM_PROB=[1,0,0,0,0]
-#X_TRANSFORM_PROB=[0, 0, 0, 0]
+
 
 
 
@@ -33,23 +32,39 @@ def plot_for_BA(model_type=MODELS[1]):
     global COMMON_TRANSFORM_PROB, X_TRANSFORM_PROB
     COMMON_TRANSFORM_PROB = [0, 0, 0, 0, 0]
     X_TRANSFORM_PROB = [0, 0, 0, 0]
-    utils.seed_generator()
+    utils.seed_generator(SEED=16923)
     train_GDM,train_GSL,test_GDM,test_GSL=create_dataset.create_dataset(amount_samples=1,window_size=[64,64],save=False)
     train_dataset, test_dataset = load_reshape_dataset(model_type=model_type,transform=True, load=False, train_GDM=train_GDM, train_GSL=train_GSL, test_GDM=test_GDM, test_GSL=test_GSL)
     #train_dataset, test_dataset= load_reshape_dataset(model_type=model_type, transform=True, load=False)
-    sample_number=4958
-    size=[1,3]
-    fig_width = 3 * 2  # 4 columns × 2 inches per image
-    fig_height =  2  # 5 rows × 2 inches per image
-    f, arr = plt.subplots(size[0],size[1], figsize=(fig_width, fig_height)) 
+    sample_number=1986
+    size=[1,4]
+    fig_width = 3 * 4  # 4 columns × 2 inches per image
+    fig_height =  4  # 5 rows × 2 inches per image
+    f, arr = plt.subplots(size[0],size[1], figsize=(fig_width, fig_height))
     for j in range(arr.shape[0]):
         #print(i)
         
+        titles=["Original","Horizontal Flip","Vertical Flip","Rotation90","Rotation180","Rotation270"]#flip
+        titles=["Original","Clockwise Rotation by 90°","Clockwise Rotation by 180°","Clockwise Rotation by 270°"]
+        titles=["Original","with Additive Noise","with Multiplicative Noise"]
+        titles=["Original","S-shaped Transform","Cage-shaped Transform","Grid Transform"]
+        arr[j].set_title(f"{titles[j]}")
+        arr[j].set_xlabel("x (dm)")
+        arr[j].label_outer()  # Only show outer labels to add a small padding effect
+        arr[j].set_ylabel("y (dm)")                          
+
+
+        X_TRANSFORM_PROB=[0,0,0,0,0]
+        if j!=0:        
+            X_TRANSFORM_PROB[j]=1
+            arr[j].set_ylabel("")
+
         COMMON_TRANSFORM_PROB=[0,0,0,0,0]
         if j!=0:        
-            COMMON_TRANSFORM_PROB[j]=1
-        X_TRANSFORM_PROB=[0, 0, 0, 0]
-        sample=train_dataset.__getitem__(sample_number)
+            COMMON_TRANSFORM_PROB[j+1]=0
+            arr[j].set_ylabel("")
+        
+        sample=test_dataset.__getitem__(sample_number)
         arr[j].imshow(sample[0].squeeze(0).unsqueeze(-1).numpy(), origin="lower")        
 
 
@@ -59,73 +74,6 @@ def plot_for_BA(model_type=MODELS[1]):
     plt.subplots_adjust(hspace =0.4)
     plt.show()
 
-
-
-
-
-
-
-
-
-
-    a=0 
-    b=5
-    if model_type==MODELS[0]:
-        max_value = torch.max(temp[0][0])
-        print(f"Max value in the dataset: {max_value}")
-        if model_type==MODELS[0]:
-            temporary=temp[1].reshape(1,temp[0].shape[-2],temp[0].shape[-1])
-            single_y.append(temporary)
-            #temp[1]=temp[1].reshape(1,temp[0].shape[-2],temp[0].shape[-1])
-        else:
-            single_y.append(temp[1])
-        single_x.append(temp[0])
-    single_x = torch.stack(single_x)
-    single_y = torch.stack(single_y)
-    #print(f"Max value in the dataset: {max_value}")
-    #z=train_dataset[a:b]
-    single_z = []
-    print("new dataset test:")
-    train_dataset, test_dataset= load_reshape_dataset(model_type=model_type,transform=False, load=False)
-    if model_type==MODELS[0]:
-        temp_list=[]
-        x=[]
-        y=[]
-        z=[]
-        true_z=[]
-        for i in range(a,b):
-            temp=train_dataset.__getitem__(i)
-            temporary=temp[1].reshape(1,temp[0].shape[-2],temp[0].shape[-1])
-            temp_list.append(temporary)
-            x.append(temp[0])
-            y.append(temporary)
-        true_x=x
-        true_y=y
-        end=b
-    else:
-        z=train_dataset[a:b]
-        x=z[0]
-        y=z[1]
-        z = []
-        true_z=train_dataset[a:b]
-        true_x=true_z[0]
-        true_y=true_z[1]
-        true_z=[]
-        end=x.shape[0]
-    for i in range(0, end, 5):
-        z.extend(x[i:i+5])
-        z.extend(y[i:i+5])
-        single_z.extend(single_x[i:i+5])
-        single_z.extend(single_y[i:i+5])
-        true_z.extend(true_x[i:i+5])
-        true_z.extend(true_y[i:i+5])
-
-    z = torch.stack(z)
-    single_z = torch.stack(single_z)
-    true_z = torch.stack(true_z)
-    utils.plot_more_images(true_z.squeeze().unsqueeze(-1),title=f"multiple_{a}-{b}_z",save=True)
-    utils.plot_more_images(single_z.squeeze().unsqueeze(-1),title=f"multiple_{a}-{b}_single_z",save=True)
-    #utils.plot_more_images(z.squeeze().unsqueeze(-1),title=f"multiple_{a}-{b}_z_multiple_transform2",save=False)
 
 
 

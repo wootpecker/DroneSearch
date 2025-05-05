@@ -12,7 +12,7 @@ import numpy
 import shutil
 import logging
 
-MODEL_TYPES = ["VGG", "UnetS", "VGGVariation"]
+MODEL_TYPES = ["VGG8", "UnetS", "VGGVariation"]
 
 
 
@@ -274,7 +274,7 @@ def load_random(model_type: str, epoch=None, device="cuda"):
   return start
 
     
-def plot_loss_curves(results: Dict[str, List[float]]):
+def plot_loss_curves(results: Dict[str, List[float]], model_type=MODEL_TYPES[0], transform=True):
     """Plots training curves of a results dictionary.
 
     Args:
@@ -297,23 +297,34 @@ def plot_loss_curves(results: Dict[str, List[float]]):
     epochs = range(len(results['train_loss']))
 
     # Setup a plot 
-    plt.figure(figsize=(15, 7))
+    plt.figure(figsize=(11, 5))
 
     # Plot loss
     plt.subplot(1, 2, 1)
-    plt.plot(epochs, loss, label='train_loss')
-    plt.plot(epochs, test_loss, label='test_loss')
+    plt.plot(epochs, loss, label='Train Loss')
+    plt.plot(epochs, test_loss, label='Test Loss')
     plt.title('Loss')
     plt.xlabel('Epochs')
     plt.legend()
 
     # Plot accuracy
     plt.subplot(1, 2, 2)
-    plt.plot(epochs, accuracy, label='train_accuracy')
-    plt.plot(epochs, test_accuracy, label='test_accuracy')
+    plt.plot(epochs, accuracy, label='Train Accuracy')
+    plt.plot(epochs, test_accuracy, label='Test Accuracy')
     plt.title('Accuracy')
     plt.xlabel('Epochs')
     plt.legend()
+    target_dir_path = Path(f"results/loss_curve")
+    target_dir_path.mkdir(parents=True, exist_ok=True)
+
+    save_format=".png"
+    transform_str="on_original_data"
+    if transform:
+      transform_str="on_transformed_data"
+    file_name = "loss_" + model_type + "_" + transform_str + save_format
+    file_save_path = target_dir_path / file_name
+
+    plt.savefig(file_save_path)
     plt.show()
 
 

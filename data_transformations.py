@@ -244,7 +244,7 @@ def generate_coordinates_s_shape(dataset_GDM,distance=1,pad=1,start_left=True):
     #print(len(coordinates))
     return coordinates
 
-def generate_coordinates_random(dataset_GDM, distance=3, pad=2):
+def generate_coordinates_random(dataset_GDM, distance=3, pad=1):
     #width, height = dataset_GDM.shape[-2]-1, dataset_GDM.shape[-1]-1
     width,height=dataset_GDM[-2],dataset_GDM[-1]
     reduced_datapoints = (width - 2 * pad) * (height - 2 * pad)
@@ -255,7 +255,7 @@ def generate_coordinates_random(dataset_GDM, distance=3, pad=2):
     return all_coordinates[:random_datapoints]
 
 
-def generate_coordinates_cage(dataset_GDM,distance=3,pad=2):
+def generate_coordinates_cage(dataset_GDM,distance=3,pad=1):
     width,height=dataset_GDM[-2]-1,dataset_GDM[-1]-1
     coordinates = []
     x,y=pad,pad
@@ -275,7 +275,7 @@ def generate_coordinates_cage(dataset_GDM,distance=3,pad=2):
         x=pad
     return coordinates
     
-def generate_coordinates_grid(dataset_GDM,distance=3,pad=2):
+def generate_coordinates_grid(dataset_GDM,distance=3,pad=1):
     width,height=dataset_GDM[-2]-1,dataset_GDM[-1]-1
     distance+=1
     coordinates=[]

@@ -16,7 +16,7 @@ from torchvision import transforms
 
 HYPER_PARAMETERS = {
               "SAVE_DATASET": False,
-               "TRANSFORM": True,
+               "TRANSFORM": False,
                "MODEL_TYPES": ["VGG8", "UnetS", "VGGVariation"],
                "LOGS_SAVE": True,
                "AMOUNT_SAMPLES": 1,
@@ -46,7 +46,7 @@ def main():
   logs_save=HYPER_PARAMETERS['LOGS_SAVE']
   logger.logging_config(logs_save=logs_save,amount_samples=HYPER_PARAMETERS['AMOUNT_SAMPLES'], transform=transform, model_type=model_type, window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
 
-  utils.reset_training(model_type=model_type)  
+  #utils.reset_training(model_type=model_type, transform=transform)  
   train_all_models(model_type=model_type, transform=transform)
    
 
@@ -93,15 +93,15 @@ s
     # originally BCEwithLogitsLoss
     loss_fn = torch.nn.BCEWithLogitsLoss()
     logging.info(f"[TRAIN] Loss: {loss_fn}, Optimizer: {type(optimizer).__name__}, Learning Rate: {optimizer.param_groups[0]['lr']}")  
-    mode_results=engine_encdec.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=TRAINING_PARAMETERS['NUM_EPOCHS'], device=device, transform=transform)
+    model_results=engine_encdec.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=TRAINING_PARAMETERS['NUM_EPOCHS'], device=device, transform=transform)
   else:
     logging.info(f"[TRAIN] Loss: {loss_fn}, Optimizer: {type(optimizer).__name__}, Learning Rate: {optimizer.param_groups[0]['lr']}")  
-    mode_results=engine.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=TRAINING_PARAMETERS['NUM_EPOCHS'], device=device, transform=transform)
+    model_results=engine.train(model=model,train_dataloader=train_dataloader, test_dataloader=test_dataloader, loss_fn=loss_fn, optimizer=optimizer, epochs=TRAINING_PARAMETERS['NUM_EPOCHS'], device=device, transform=transform)
   end_time = timer()
   print(f"[INFO] Total training time: {end_time-start_time:.3f} seconds")
   # Save the model and plot loss curve
   #utils.save_model(model=model,model_type=model_type,device=device)
-  utils.plot_loss_curves(mode_results)
+  utils.plot_loss_curves(model_results,model_type=model_type, transform=transform)
 
   
 
