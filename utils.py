@@ -70,7 +70,7 @@ def plot_image(image, title=""):
     """
     image=image.squeeze().unsqueeze(-1)
     plt.imshow(image, cmap='viridis', origin='lower')
-    plt.title(title)
+
     plt.show()
 
 
@@ -88,14 +88,10 @@ def save_image(image,index, title=""):
   target_dir_path.mkdir(parents=True, exist_ok=True)  
   target_dir_path = Path(f"data/images")
   target_dir_path.mkdir(parents=True, exist_ok=True) 
-  plt.savefig(f"{target_dir_path}/{title}.png")
-  logging.info(f"[SAVE] Image saved at: {target_dir_path}\{title}.png")  
+  plt.savefig(f"{target_dir_path}/{title}.pdf")
+  logging.info(f"[SAVE] Image saved at: {target_dir_path}\{title}.pdf")  
   plt.close(fig)
-  #fig, ax = plt.subplots()
-  #ax.imshow(image, cmap='viridis')
-  #ax.set_title(title)
-  #plt.close(fig)  # Close the figure to prevent it from displaying
-  #return fig
+
 
 
 def plot_more_images(images, title="", save=False):
@@ -116,15 +112,14 @@ def plot_more_images(images, title="", save=False):
         if i >= len(images):
           break
         ax.imshow(images[i], cmap='viridis', origin='lower')        
-        #ax.axis('off')
     plt.suptitle(title)
     plt.tight_layout()
     
     if save:
       target_dir_path = Path(f"data/images")
       target_dir_path.mkdir(parents=True, exist_ok=True) 
-      plt.savefig(f"{target_dir_path}/{title}.png")
-      logging.info(f"[SAVE] Image saved at: {target_dir_path}\{title}.png")        
+      plt.savefig(f"{target_dir_path}/{title}.pdf")
+      logging.info(f"[SAVE] Image saved at: {target_dir_path}\{title}.pdf")        
     else:
       plt.show()
 
@@ -301,23 +296,23 @@ def plot_loss_curves(results: Dict[str, List[float]], model_type=MODEL_TYPES[0],
 
     # Plot loss
     plt.subplot(1, 2, 1)
-    plt.plot(epochs, loss, label='Train Loss')
-    plt.plot(epochs, test_loss, label='Test Loss')
-    plt.title('Loss')
+    plt.plot(epochs, loss, label='Training Set')
+    plt.plot(epochs, test_loss, label='Testing Set')
+    plt.ylabel('Loss')
     plt.xlabel('Epochs')
     plt.legend()
 
     # Plot accuracy
     plt.subplot(1, 2, 2)
-    plt.plot(epochs, accuracy, label='Train Accuracy')
-    plt.plot(epochs, test_accuracy, label='Test Accuracy')
-    plt.title('Accuracy')
+    plt.plot(epochs, accuracy, label='Training Set')
+    plt.plot(epochs, test_accuracy, label='Testing Set')
+    plt.ylabel('Accuracy')
     plt.xlabel('Epochs')
     plt.legend()
     target_dir_path = Path(f"results/loss_curve")
     target_dir_path.mkdir(parents=True, exist_ok=True)
 
-    save_format=".png"
+    save_format=".pdf"
     transform_str="on_original_data"
     if transform:
       transform_str="on_transformed_data"

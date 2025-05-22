@@ -107,7 +107,7 @@ class UnetS(nn.Module):
     input_shape(int): An integer indicating number of input channels (default 1 channel).
     output_shape(int): An integer indicating number of classes.
     """
-    def __init__(self, output_shape: int,input_shape=1,dropout=0.5) -> None:
+    def __init__(self, output_shape: int,input_shape=1,dropout=0.1) -> None:
         FEATURE_MAP=[32,64,128,256]
         super().__init__()
         self.dropout = dropout
@@ -141,7 +141,7 @@ class UnetS(nn.Module):
         nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(),
-        #nn.Dropout2d(self.dropout),
+        nn.Dropout2d(self.dropout),
         nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(),

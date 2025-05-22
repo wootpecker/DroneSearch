@@ -16,37 +16,40 @@ from torchvision import transforms
 
 HYPER_PARAMETERS = {
               "SAVE_DATASET": False,
-               "TRANSFORM": False,
+               "TRANSFORM": True,
                "MODEL_TYPES": ["VGG8", "UnetS", "VGGVariation"],
                "LOGS_SAVE": True,
-               "AMOUNT_SAMPLES": 1,
+               "AMOUNT_SAMPLES": 16,
                "WINDOW_SIZE": [64,64]
   }
 
 
 
 TRAINING_PARAMETERS = {
-              "NUM_EPOCHS": 20,
-               "BATCH_SIZE": 128,
+              "NUM_EPOCHS": 10,
+               "BATCH_SIZE": 32,
                "LEARNING_RATE": 0.001,
                "LOAD_SEED": 16923,
-               "TRAIN_SEED": 42
+               "TRAIN_SEED": 42,
+               "TEST_SEED": 1009
   }
 
-
-
+BATCH_SIZE = [32, 64, 128, 256, 16]
+LEARNING_RATE = [0.001, 0.01, 0.1, 1.0]
+TRAINING_PARAMETERS['LEARNING_RATE'] = LEARNING_RATE[0]
+TRAINING_PARAMETERS['BATCH_SIZE'] = BATCH_SIZE[1]
 
 # Setup target device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def main():
-  model_type=HYPER_PARAMETERS['MODEL_TYPES'][0]
+  model_type=HYPER_PARAMETERS['MODEL_TYPES'][1]
   transform=HYPER_PARAMETERS['TRANSFORM']
   logs_save=HYPER_PARAMETERS['LOGS_SAVE']
   logger.logging_config(logs_save=logs_save,amount_samples=HYPER_PARAMETERS['AMOUNT_SAMPLES'], transform=transform, model_type=model_type, window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
 
-  #utils.reset_training(model_type=model_type, transform=transform)  
+ # utils.reset_training(model_type=model_type, transform=transform)  
   train_all_models(model_type=model_type, transform=transform)
    
 

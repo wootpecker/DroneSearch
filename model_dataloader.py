@@ -14,6 +14,7 @@ DATASETS=["train","test"]
 COMMON_TRANSFORM=[transforms.RandomHorizontalFlip(p=1), transforms.RandomVerticalFlip(p=1), data_transformations.RotationTransform(rotation_angle=90),data_transformations.RotationTransform(rotation_angle=180),data_transformations.RotationTransform(rotation_angle=270)]
 COMMON_TRANSFORM_PROB=[0.5, 0.5, 0.25, 0.5, 0.75]#HorizontalFlip(50%),VerticalFlip(50%),Rotation90(25%),Rotation180(25%),Rotation270(25%)
 X_TRANSFORM=[data_transformations.NoiseTransform(),data_transformations.SshapeTransform(),data_transformations.CageTransform(),data_transformations.GridTransform()]
+X_TRANSFORM=[]
 X_TRANSFORM_PROB=[0.5, 0.4, 0.6, 0.7]#Noise(50%),Sshape(40%),Cage(20%),Grid(10%)
 
 
@@ -159,18 +160,18 @@ def load_reshape_dataset(model_type=MODELS[0],transform=True, load=True, train_G
 
 class EncDecDataset(torch.utils.data.Dataset):
     """Dataset with X,y,classes for the Encoder Decoder model"""
-    def __init__(self, X, y, classes=None, common_transform=None, x_transform=None):
+    def __init__(self, X, Y, classes=None, common_transform=None, x_transform=None):
         self.X = X
-        self.y = y
+        self.Y = Y
         if classes is None:
-            self.classes = y.shape[-1]
+            self.classes = Y.shape[-3]
         else:
             self.classes = classes
         self.common_transform = common_transform
         self.x_transform = x_transform
 
     def __getitem__(self, index):
-        x, y = self.X[index], self.y[index]
+        x, y = self.X[index], self.Y[index]
         #mask = self.mask[index]
         if self.common_transform:
             randomize=torch.rand(len(self.common_transform)) 
@@ -208,23 +209,23 @@ class EncDecDataset(torch.utils.data.Dataset):
         return x, y
     
     def __len__(self):
-        return len(self.y)
+        return len(self.Y)
 
 
 class VGGDataset(torch.utils.data.Dataset):
     """Dataset with X,y,classes for the VGG model"""
-    def __init__(self, X, y, classes=None, common_transform=None, x_transform=None):
+    def __init__(self, X, Y, classes=None, common_transform=None, x_transform=None):
         self.X = X
-        self.y = y
+        self.Y = Y
         if classes is None:
-            self.classes = y.shape[-1]
+            self.classes = Y.shape[-1]
         else:
             self.classes = classes
         self.common_transform = common_transform
         self.x_transform = x_transform
 
     def __getitem__(self, index):
-        x, y = self.X[index], self.y[index]
+        x, y = self.X[index], self.Y[index]
         #Reshape y, to perform transformations
         y=y.reshape(1,x.shape[-2],x.shape[-1])
         if self.common_transform:
@@ -265,7 +266,7 @@ class VGGDataset(torch.utils.data.Dataset):
         return x, y
     
     def __len__(self):
-        return len(self.y)
+        return len(self.Y)
     
 def common_transform_to_str(common_transform):
     common_transform_str=[]

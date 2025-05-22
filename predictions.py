@@ -32,10 +32,10 @@ HYPER_PARAMETERS = ds4_train_model.HYPER_PARAMETERS
 TRAINING_PARAMETERS = ds4_train_model.TRAINING_PARAMETERS
 
 
-
-HYPER_PARAMETERS['AMOUNT_SAMPLES'] = 1
+#TRAINING_PARAMETERS['TEST_SEED'] = 16923
+#  and AMOUNT_SAMPLES=1 for images in BA Thesis
+HYPER_PARAMETERS['AMOUNT_SAMPLES'] = 16
 HYPER_PARAMETERS['TRANSFORM'] = True
-
 
 
 MODEL_TO_TEST=[HYPER_PARAMETERS['MODEL_TYPES'][0],HYPER_PARAMETERS['MODEL_TYPES'][1]]
@@ -46,8 +46,8 @@ def main():
     
     logger.logging_config(logs_save=False)
     #plot_models()
-    for models in MODEL_TO_TEST:
-        plot_transform(model_type=models)
+    plot_transform()
+
 
     #plot_transform(model_type=HYPER_PARAMETERS['MODEL_TYPES'][1])
 
@@ -88,7 +88,7 @@ def plot_model_accuracies(result_dic):
     plt.xlabel('N', labelpad=5)
     plt.legend(loc='best', fontsize='small')
     plt.tight_layout()
-    plt.savefig(target_dir_path / f'approximate_accuracy_model_comparison{figname}.png')
+    plt.savefig(target_dir_path / f'approximate_accuracy_model_comparison{figname}.pdf')
     #plt.show()
 
     plt.figure(figsize=(11, 5))
@@ -102,7 +102,7 @@ def plot_model_accuracies(result_dic):
     plt.xlabel('N', labelpad=5)
     plt.legend(loc='best', fontsize='small')
     plt.tight_layout()
-    plt.savefig(target_dir_path / f'topn_accuracy_model_comparison{figname}.png')
+    plt.savefig(target_dir_path / f'topn_accuracy_model_comparison{figname}.pdf')
     #plt.show()
 
 
@@ -117,25 +117,25 @@ def plot_model_accuracies(result_dic):
     plt.xlabel('N', labelpad=5)
     plt.legend(loc='best', fontsize='small')
     plt.tight_layout()
-    plt.savefig(target_dir_path / f'confidence_model_comparison{figname}.png')
+    plt.savefig(target_dir_path / f'confidence_model_comparison{figname}.pdf')
 
     #plt.show()    
     return result_dic
 
 
 
-def plot_transform(model_type=HYPER_PARAMETERS['MODEL_TYPES'][0]):
-
-    result_dic=[]
-    global TRANSFORMED_MODEL
-    TRANSFORMED_MODEL=True
-    for i in range(0,2):        
-        accuracy_results=do_predictions(model_type=model_type)
-        logging.info(f"[ACCURACY] Results: {accuracy_results}")
-        #print(accuracy_results)
-        result_dic.append(accuracy_results)
-        TRANSFORMED_MODEL=False
-    plot_transform_accuracies(result_dic, model_type)
+def plot_transform():
+    for model_type in MODEL_TO_TEST:
+        result_dic=[]
+        global TRANSFORMED_MODEL
+        TRANSFORMED_MODEL=True
+        for i in range(0,2):        
+            accuracy_results=do_predictions(model_type=model_type)
+            logging.info(f"[ACCURACY] Results: {accuracy_results}")
+            #print(accuracy_results)
+            result_dic.append(accuracy_results)
+            TRANSFORMED_MODEL=False
+        plot_transform_accuracies(result_dic, model_type)
 
 
 
@@ -173,7 +173,7 @@ def plot_transform_accuracies(result_dic,model_type=HYPER_PARAMETERS['MODEL_TYPE
     plt.xlabel('N', labelpad=5)
     plt.legend(loc='best', fontsize='small')
     plt.tight_layout()
-    plt.savefig(target_dir_path / f'approximate_accuracy_{model_type}{figname}.png')
+    plt.savefig(target_dir_path / f'approximate_accuracy_{model_type}{figname}.pdf')
     #plt.show()
 
     plt.figure(figsize=(11, 5))
@@ -188,7 +188,7 @@ def plot_transform_accuracies(result_dic,model_type=HYPER_PARAMETERS['MODEL_TYPE
     plt.xlabel('N', labelpad=5)
     plt.legend(loc='best', fontsize='small')
     plt.tight_layout()
-    plt.savefig(target_dir_path / f'evaluation_{model_type}{figname}.png')
+    plt.savefig(target_dir_path / f'evaluation_{model_type}{figname}.pdf')
     #plt.show()
 
 
@@ -202,7 +202,7 @@ def plot_transform_accuracies(result_dic,model_type=HYPER_PARAMETERS['MODEL_TYPE
     plt.xlabel('N', labelpad=5)
     plt.legend(loc='best', fontsize='small')
     plt.tight_layout()
-    plt.savefig(target_dir_path / f'confidence_{model_type}{figname}.png')
+    plt.savefig(target_dir_path / f'confidence_{model_type}{figname}.pdf')
 
     #plt.show()    
     return result_dic
@@ -228,13 +228,14 @@ def do_predictions(model_type= "VGG"):
     model = model_builder.choose_model(model_type=model_type,output_shape=classes,device=device,window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
     model,_=utils.load_model(model= model, model_type=model_type, device=device, transform=TRANSFORMED_MODEL)
     
-    utils.seed_generator(SEED=TRAINING_PARAMETERS['LOAD_SEED'])
+    utils.seed_generator(SEED=TRAINING_PARAMETERS['TEST_SEED'])
     y_pred,y_list,X_list,y_logit_list,y_preds_percent=make_prediction_all_results(model_type=model_type,model=model,test_dataloader=test_dataloader)
     accuracy_results=print_metrics(y_pred,y_list,y_preds_percent,classes,model_type)
-    benchmark_similarity,benchmark_aproximate_accuracy,benchmark_topn_accuracy=calculate_benchmark_accuracies(X_list,y_list,y_preds_percent)
+    benchmark_similarity,benchmark_aproximate_accuracy,benchmark_topn_accuracy,benchmark_euclidean_distance=calculate_benchmark_accuracies(X_list,y_list,y_preds_percent)
     accuracy_results['benchmark_aproximate_accuracy']=benchmark_aproximate_accuracy
     accuracy_results['benchmark_similarity']=benchmark_similarity
     accuracy_results['benchmark_topn_accuracy']=benchmark_topn_accuracy
+    accuracy_results['benchmark_euclidean_distance']=benchmark_euclidean_distance
     y_list,y_logit_list,y_preds_percent=reshape_tensor(y_list=y_list,y_logit_list=y_logit_list,y_preds_percent=y_preds_percent)
     make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent)  
     return accuracy_results
@@ -392,7 +393,23 @@ def calculate_benchmark_accuracies(X_list,y_list,y_preds_percent):
         topn_accuracies.append(topn_acc)
         #print(f"approx_acc: {approx_acc}")
     #print(f"approx_acc: {approx_acc}")
-    return accuracy_max_pred,approx_accuracies,topn_accuracies
+    benchmark_euclidean_distance=average_euclidean_distance(y_index,x_max_index,X_list.shape[-1])
+    return accuracy_max_pred,approx_accuracies,topn_accuracies,benchmark_euclidean_distance
+
+def average_euclidean_distance(y_true_list, y_predicted_list,height):
+    distances = []
+    for y_true, y_predicted in zip(y_true_list, y_predicted_list):
+        y_true_height = torch.div(y_true, height, rounding_mode='floor')
+        y_true_width = y_true % height
+        y_predicted_height = torch.div(y_predicted, height, rounding_mode='floor')
+        y_predicted_width = y_predicted % height
+        
+
+        distance= torch.sqrt((y_true_height - y_predicted_height) ** 2 + (y_true_width - y_predicted_width) ** 2)
+        distances.append(distance)
+    average_distance = torch.mean(torch.stack(distances))
+    print(f"average_distance: {average_distance.item()}")
+    return average_distance.item()
 
 def approximate_accuracy(y_true_list, y_predicted_list, height, distance):
     accuracies = 0
@@ -434,11 +451,14 @@ def calculate_accuracies(approx_y_true,approx_y_pred,topn_y_true,topn_y_pred,cla
              "test_acc": [...]}
     """
     results = {"approximate_accuracy": [],
+               "euclidean_distance": [],
                "topn_accuracy": [],
                "confidence": [],
                "benchmark_aproximate_accuracy": [],
                "benchmark_similarity": [],
-               "benchmark_topn_accuracy": []}
+               "benchmark_topn_accuracy": [],
+               "benchmark_euclidean_distance": []
+               }
  
     start=1
     end=10
@@ -448,12 +468,14 @@ def calculate_accuracies(approx_y_true,approx_y_pred,topn_y_true,topn_y_pred,cla
         results['approximate_accuracy'].append(approx_acc)
         results['confidence'].append(confidence)
         results['topn_accuracy'].append(topn_acc)
+
+    euclidean_distance=average_euclidean_distance(approx_y_true,approx_y_pred,classes)
+    results['euclidean_distance'].append(euclidean_distance)
     return results
 
 
 
 def make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
-    #make_trainingsample_plot(y_pred,X_list,y_list,y_logit_list,y_preds_percent)
     #make_trainingsample_plot(y_pred,X_list,y_list,y_logit_list,y_preds_percent)
     make_plots_multiple(y_pred,X_list,y_list,y_logit_list,y_preds_percent)
 
@@ -464,7 +486,7 @@ def make_trainingsample_plot(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
     size=[1,4]
     fig_width = 4 * 4  # 4 columns × 2 inches per image
     fig_height = 1 * 4  # 5 rows × 2 inches per image
-    f, arr = plt.subplots(size[0],size[1], figsize=(fig_width, fig_height)) 
+    f, arr = plt.subplots(size[0], size[1], figsize=(fig_width, fig_height))#, tight_layout=True)
     random_samples=random.sample(range(X_list.shape[0]),k=5)
     for j in range(arr.shape[0]):
         i=random_samples[j]
@@ -481,25 +503,37 @@ def make_trainingsample_plot(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
         else:
             color='red'     
 
-        arr[j].set_xlabel(f"x (dm)")
-        arr[j].set_ylabel(f"y (dm)")
+        arr[j].set_xlabel(f"x (dm)", fontsize=14)
+        arr[j].set_ylabel(f"y (dm)", fontsize=14)
         arr[j].label_outer()        
         if(j==0):
-            arr[0].set_title(f"Input (X)")
-            arr[1].set_title(f"Target (Y)")
-            arr[2].set_title(f"Output of Model (y_logit)")
-            arr[3].set_title(f"Prediction of Model")
+            arr[0].set_title(f"Input (X)", fontsize=18)
+            arr[1].set_title(f"Target (y)", fontsize=18)
+            arr[2].set_title(f"Output of Model (y_logit)", fontsize=18)
+            arr[3].set_title(f"Prediction of Model", fontsize=18)
 
-    plt.title('Top N Accuracy', pad=10)
-    plt.tight_layout()
-    f.subplots_adjust(hspace =0.4)
-   # f.tight_layout()
-    #plt.subplots_adjust(hspace =0.4)
+        #arr[0].set_xticks(range(0, X_list[i].shape[-1], 10))
+        for k in range(4):
+            arr[k].set_xticks(range(0, X_list[i].shape[-1], 10))
+            arr[k].set_yticks(range(0, X_list[i].shape[-1], 10))
+            arr[k].tick_params(axis='x', labelsize=14)
+            arr[k].tick_params(axis='y', labelsize=14)
+            #plt.tight_layout()            
+        #plt.xticks(fontsize=20)
+        #plt.yticks(fontsize=14)
+        #arr[0].tight_layout()
+
+    #plt.xticks(fontsize=20)
+    #plt.yticks(fontsize=14)
+    #plt.tight_layout()
+    #f.subplots_adjust(hspace = 2.1)
+    #f.tight_layout()
+    #plt.subplots_adjust(hspace =0.1)
 
     output_dir = Path("results/images")
     output_dir.mkdir(parents=True, exist_ok=True)
-    plt.savefig(output_dir / "training_sample.png")
-    #plt.show()
+    plt.savefig(output_dir / "training_sample.pdf")
+    plt.show()
 
 
 
@@ -527,25 +561,23 @@ def make_plots_multiple(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
 
         
         if(j==0):
-            arr[j,0].set_title(f"Inputs, Max at ({x_target},{y_target})")
+            arr[j,0].set_title(f"Inputs, Max at ({x_target},{y_target})", fontsize=13)
             #arr[j,0].set(xlabel=f"x (dm)")
             #arr[j,0].set(ylabel=f"y (dm)")
-            arr[j,1].set_title(f"Outputs")
-            arr[j,2].set_title(f"Predictions, Max={y_preds_percent[i].max():.2f} at ({x_pred},{y_pred})", color=color)
+            arr[j,1].set_title(f"Outputs", fontsize=13)
+            arr[j,2].set_title(f"Predictions, Max={y_preds_percent[i].max():.2f} at ({x_pred},{y_pred})", color=color, fontsize=13)
 
         else:
-            arr[j,0].set_title(f"Max at ({x_target},{y_target})")
-            arr[j,2].set_title(f"Max={y_preds_percent[i].max():.2f} at ({x_pred},{y_pred})", color=color)
+            arr[j,0].set_title(f"Max at ({x_target},{y_target})", fontsize=13)
+            arr[j,2].set_title(f"Max={y_preds_percent[i].max():.2f} at ({x_pred},{y_pred})", color=color, fontsize=13)
         for k in range(3):
-            arr[j, k].set(xlabel="x (dm)", ylabel="y (dm)")
+            arr[j, k].set_xlabel("x (dm)", fontsize=12)
+            arr[j, k].set_ylabel("y (dm)", fontsize=12)
             arr[j, k].set_xticks(range(0, X_list[i].shape[-1], 10))
             arr[j, k].set_yticks(range(0, X_list[i].shape[-1], 10))
             arr[j, k].set_aspect('equal')
         #arr[j,2].set(ylabel=f"y (dm)")            
-        if(j==2):
-            arr[j,0].set(xlabel=f"x (dm)")
-            arr[j,1].set(xlabel=f"x (dm)")
-            arr[j,2].set(xlabel=f"x (dm)")
+
 
 
        # else:
@@ -568,13 +600,14 @@ def make_plots_multiple(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
    # f.tight_layout()
     #plt.subplots_adjust(hspace =0.4)
     #plt.title('Top N Accuracy', pad=10)
+
     plt.tight_layout()
     
     output_dir = Path("results/images")
     output_dir.mkdir(parents=True, exist_ok=True)
     files=os.listdir(output_dir)
-    plt.savefig(output_dir / f"training_sample_multiple_{len(files)+1:03d}.png")    
-    #plt.show()
+    plt.savefig(output_dir / f"training_sample_multiple_{len(files)+1:03d}.pdf")    
+    plt.show()
 
           # Ensure the same scale for x and y axes
 

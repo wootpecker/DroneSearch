@@ -41,12 +41,12 @@ def test_sshape_cage():
         dataset_GDM[0, x, y] =1 
         #dataset_GDM[0, int(i/64), i%64] =1 
     coordinates=generate_coordinates_s_shape(dataset_GDM.shape,distance=distance,pad=pad)
-    dataset_transformed=adequate_input(dataset_GDM,coordinates)
+    dataset_transformed=transform_input(dataset_GDM,coordinates)
     if(rotate==1):
         dataset_GDM = transforms.functional.rotate(dataset_GDM, 90)
         #dataset_transformed= transforms.functional.rotate(dataset_transformed, 90)
         coordinates=generate_coordinates_s_shape(dataset_GDM.shape,distance=distance-1,pad=pad+2,start_left=False)
-        dataset_transformed2=adequate_input(dataset_GDM,coordinates)
+        dataset_transformed2=transform_input(dataset_GDM,coordinates)
         dataset_transformed2= transforms.functional.rotate(dataset_transformed2, 90)
     
     # Write each element bigger than 0 from dataset_transformed2 to dataset_transformed
@@ -64,7 +64,7 @@ def test_input():
         dataset_GDM[0, int(i/64), i%64] =1 #torch.rand(1) * 0.15
 
     coordinates=generate_coordinates_cage(dataset_GDM.shape,distance=distance,pad=pad)
-    dataset_transformed=adequate_input(dataset_GDM,coordinates)
+    dataset_transformed=transform_input(dataset_GDM,coordinates)
     utils.plot_image(dataset_transformed)
     print(f"{coordinates}")
     print(f"{dataset_transformed}")
@@ -143,59 +143,31 @@ class NoiseTransform:
 class SshapeTransform:
     def __call__(self, x, distance=1, pad=1, start_left=True):
         coordinates=generate_coordinates_s_shape(x.shape,distance=distance,pad=pad,start_left=start_left)        
-        x_transformed=adequate_input(dataset_GDM=x, coordinates=coordinates,adequate_input=30)
-        if len(x_transformed.shape) < 2:
-            coordinates=generate_coordinates_s_shape(x.shape,distance=max(distance//2,1),pad=pad,start_left=True)  
-            x_transformed=adequate_input(dataset_GDM=x, coordinates=coordinates)
-            if len(x_transformed.shape) < 2:
-                #dataset_mask=generate_no_mask(x)
-                return x#,dataset_mask 
-        #dataset_mask=generate_mask(x,coordinates)            
-        return x_transformed#,dataset_mask 
+        x_transformed=transform_input(dataset_GDM=x, coordinates=coordinates)        
+        return x_transformed 
 
 
 
 class GridTransform:
     def __call__(self, x, distance=1, pad=1):
         coordinates=generate_coordinates_grid(x.shape,distance=distance,pad=pad)        
-        x_transformed=adequate_input(dataset_GDM=x, coordinates=coordinates,adequate_input=30)
-        if len(x_transformed.shape) < 2:
-            coordinates=generate_coordinates_s_shape(x.shape,distance=distance,pad=pad,start_left=True) 
-            x_transformed=adequate_input(dataset_GDM=x, coordinates=coordinates)
-            if len(x_transformed.shape) < 2:
-                #dataset_mask=generate_no_mask(x)
-                return x#,dataset_mask 
-        #dataset_mask=generate_mask(x,coordinates)            
-        return x_transformed#,dataset_mask 
+        x_transformed=transform_input(dataset_GDM=x, coordinates=coordinates)    
+        return x_transformed
     
 
     
 class CageTransform:
     def __call__(self, x, distance=1, pad=1):
         coordinates= generate_coordinates_cage(x.shape,distance=distance,pad=pad)        
-        x_transformed=adequate_input(dataset_GDM=x, coordinates=coordinates,adequate_input=30)
-        if len(x_transformed.shape) < 2:
-            coordinates=generate_coordinates_s_shape(x.shape,distance=max(distance//2,1),pad=pad,start_left=True)             
-            x_transformed=adequate_input(dataset_GDM=x, coordinates=coordinates)
-            if len(x_transformed.shape) < 2:
-                #dataset_mask=generate_no_mask(x)
-                return x#,dataset_mask 
-        #dataset_mask=generate_mask(x,coordinates)            
-        return x_transformed#,dataset_mask 
+        x_transformed=transform_input(dataset_GDM=x, coordinates=coordinates)         
+        return x_transformed 
 
 
 class RandomTransform:
     def __call__(self, x, distance=1, pad=1):
         coordinates= generate_coordinates_random(x.shape,distance=distance,pad=pad)        
-        x_transformed=adequate_input(dataset_GDM=x, coordinates=coordinates,adequate_input=30)
-        if len(x_transformed.shape) < 2:
-            coordinates=generate_coordinates_cage(x.shape,distance=distance,pad=pad)
-            x_transformed=adequate_input(dataset_GDM=x, coordinates=coordinates)
-            if len(x_transformed.shape) < 2:
-                #dataset_mask=generate_no_mask(x)
-                return x#,dataset_mask 
-        #dataset_mask=generate_mask(x,coordinates)            
-        return x_transformed#,dataset_mask  
+        x_transformed=transform_input(dataset_GDM=x, coordinates=coordinates)
+        return x_transformed
 
 
 
@@ -244,7 +216,7 @@ def generate_coordinates_s_shape(dataset_GDM,distance=1,pad=1,start_left=True):
     #print(len(coordinates))
     return coordinates
 
-def generate_coordinates_random(dataset_GDM, distance=3, pad=1):
+def generate_coordinates_random(dataset_GDM, distance=3, pad=2):
     #width, height = dataset_GDM.shape[-2]-1, dataset_GDM.shape[-1]-1
     width,height=dataset_GDM[-2],dataset_GDM[-1]
     reduced_datapoints = (width - 2 * pad) * (height - 2 * pad)
@@ -255,7 +227,7 @@ def generate_coordinates_random(dataset_GDM, distance=3, pad=1):
     return all_coordinates[:random_datapoints]
 
 
-def generate_coordinates_cage(dataset_GDM,distance=3,pad=1):
+def generate_coordinates_cage(dataset_GDM,distance=3,pad=2):
     width,height=dataset_GDM[-2]-1,dataset_GDM[-1]-1
     coordinates = []
     x,y=pad,pad
@@ -275,7 +247,7 @@ def generate_coordinates_cage(dataset_GDM,distance=3,pad=1):
         x=pad
     return coordinates
     
-def generate_coordinates_grid(dataset_GDM,distance=3,pad=1):
+def generate_coordinates_grid(dataset_GDM,distance=3,pad=2):
     width,height=dataset_GDM[-2]-1,dataset_GDM[-1]-1
     distance+=1
     coordinates=[]
@@ -291,22 +263,12 @@ def generate_coordinates_grid(dataset_GDM,distance=3,pad=1):
 
 
     
-def adequate_input(dataset_GDM,coordinates,adequate_input=20):   
-    adequate_input=0
+def transform_input(dataset_GDM,coordinates):   
     dataset_GDM = dataset_GDM.squeeze()    
     transformed_dataset = torch.zeros_like(dataset_GDM)
-    if adequate_input > 0:
-        indices = torch.tensor(coordinates).t()
-        transformed_dataset[indices[0], indices[1]] = dataset_GDM[indices[0], indices[1]]
-        
-        if torch.sum(transformed_dataset > 0.3) > adequate_input:
-            return transformed_dataset.unsqueeze(0)
-        else:
-            return torch.zeros(1)
-    else:
-        indices = torch.tensor(coordinates).t()
-        transformed_dataset[indices[0], indices[1]] = dataset_GDM[indices[0], indices[1]]
-        return transformed_dataset.unsqueeze(0)
+    indices = torch.tensor(coordinates).t()
+    transformed_dataset[indices[0], indices[1]] = dataset_GDM[indices[0], indices[1]]
+    return transformed_dataset.unsqueeze(0)
 
 
 def generate_mask(dataset_GDM, coordinates):
