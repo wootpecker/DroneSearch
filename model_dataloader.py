@@ -14,7 +14,7 @@ DATASETS=["train","test"]
 COMMON_TRANSFORM=[transforms.RandomHorizontalFlip(p=1), transforms.RandomVerticalFlip(p=1), data_transformations.RotationTransform(rotation_angle=90),data_transformations.RotationTransform(rotation_angle=180),data_transformations.RotationTransform(rotation_angle=270)]
 COMMON_TRANSFORM_PROB=[0.5, 0.5, 0.25, 0.5, 0.75]#HorizontalFlip(50%),VerticalFlip(50%),Rotation90(25%),Rotation180(25%),Rotation270(25%)
 X_TRANSFORM=[data_transformations.NoiseTransform(),data_transformations.SshapeTransform(),data_transformations.CageTransform(),data_transformations.GridTransform()]
-X_TRANSFORM=[]
+#X_TRANSFORM=[]
 X_TRANSFORM_PROB=[0.5, 0.4, 0.6, 0.7]#Noise(50%),Sshape(40%),Cage(20%),Grid(10%)
 
 
@@ -39,9 +39,9 @@ def plot_for_BA(model_type=MODELS[1]):
     #train_dataset, test_dataset= load_reshape_dataset(model_type=model_type, transform=True, load=False)
     sample_number=1986
     size=[1,4]
-    fig_width = 3 * 4  # 4 columns × 2 inches per image
-    fig_height =  4  # 5 rows × 2 inches per image
-    f, arr = plt.subplots(size[0],size[1], figsize=(fig_width, fig_height))
+    fig_width = 4 * 4  # 4 columns × 4 inches per image
+    fig_height =  4  # 1 rows × 4 inches per image
+    f, arr = plt.subplots(size[0],size[1], figsize=(fig_width, fig_height), tight_layout=True)
     for j in range(arr.shape[0]):
         #print(i)
         

@@ -45,8 +45,8 @@ MODEL_TO_TEST=[HYPER_PARAMETERS['MODEL_TYPES'][0],HYPER_PARAMETERS['MODEL_TYPES'
 def main():
     
     logger.logging_config(logs_save=False)
-    #plot_models()
-    plot_transform()
+    plot_models()
+    #plot_transform()
 
 
     #plot_transform(model_type=HYPER_PARAMETERS['MODEL_TYPES'][1])
@@ -131,7 +131,8 @@ def plot_transform():
         TRANSFORMED_MODEL=True
         for i in range(0,2):        
             accuracy_results=do_predictions(model_type=model_type)
-            logging.info(f"[ACCURACY] Results: {accuracy_results}")
+            for accuracy in accuracy_results:
+                logging.info(f"[ACCURACY] {accuracy}")
             #print(accuracy_results)
             result_dic.append(accuracy_results)
             TRANSFORMED_MODEL=False
@@ -408,7 +409,6 @@ def average_euclidean_distance(y_true_list, y_predicted_list,height):
         distance= torch.sqrt((y_true_height - y_predicted_height) ** 2 + (y_true_width - y_predicted_width) ** 2)
         distances.append(distance)
     average_distance = torch.mean(torch.stack(distances))
-    print(f"average_distance: {average_distance.item()}")
     return average_distance.item()
 
 def approximate_accuracy(y_true_list, y_predicted_list, height, distance):

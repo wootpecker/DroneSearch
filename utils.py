@@ -186,10 +186,14 @@ def load_model(model: torch.nn.Module, model_type: str, device="cuda", transform
   
   if len(files)==0:
     return model,0
-  start=len(files)
-  save_format=".pth"
-  model_name = model_type + "_" + device + f"_{start:03d}" + save_format
-  model_load_path = target_dir_path / model_name
+  elif len(files)==1:
+    model_load_path = target_dir_path / files[0]
+    start=1
+  else:
+    start=len(files)
+    save_format=".pth"
+    model_name = model_type + "_" + device + f"_{start:03d}" + save_format
+    model_load_path = target_dir_path / model_name
   model.load_state_dict(torch.load(f=model_load_path,weights_only=True))
   model = model.to(device)
 
