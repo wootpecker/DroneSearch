@@ -4,21 +4,13 @@ Utility functions to make predictions.
 Main reference for code creation: https://www.learnpytorch.io/06_pytorch_transfer_learning/#6-make-predictions-on-images-from-the-test-set 
 """
 import torch
-import torchvision
-from torchvision import transforms
 import matplotlib.pyplot as plt
-from typing import Dict, List, Tuple
-#import ..model_dataloader as model_dataloader
 from logs import logger
 import model_dataloader
 import model_builder
 import utils
 from tqdm.auto import tqdm
-import torchmetrics
-from torchmetrics import ConfusionMatrix
-from mlxtend.plotting import plot_confusion_matrix
 import random
-import pandas as pd
 import math
 import logging
 import train_model
@@ -26,7 +18,7 @@ from pathlib import Path
 import os
 # Set device
 device = "cuda" if torch.cuda.is_available() else "cpu"
-MODEL_TYPES = ["VGG8", "UnetS", "VGGVariation"]
+MODEL_TYPES = ["VGG8", "UnetS"]
 TRANSFORMED_MODEL=True
 HYPER_PARAMETERS = train_model.HYPER_PARAMETERS
 TRAINING_PARAMETERS = train_model.TRAINING_PARAMETERS
@@ -37,7 +29,7 @@ TRAINING_PARAMETERS = train_model.TRAINING_PARAMETERS
 
 
 
-MODEL_TO_TEST=[HYPER_PARAMETERS['MODEL_TYPES'][0],HYPER_PARAMETERS['MODEL_TYPES'][1]]
+MODEL_TO_TEST=[TRAINING_PARAMETERS['MODEL_TYPES'][0],TRAINING_PARAMETERS['MODEL_TYPES'][1]]
 #MODEL_TO_TEST=[HYPER_PARAMETERS['MODEL_TYPES'][1]]
 
 TESTING_PARAMETERS = {
@@ -151,7 +143,7 @@ def plot_transform():
 
 
 
-def plot_transform_accuracies(result_dic,model_type=HYPER_PARAMETERS['MODEL_TYPES'][0]):
+def plot_transform_accuracies(result_dic,model_type=TRAINING_PARAMETERS['MODEL_TYPES'][0]):
     if(TESTING_PARAMETERS['TRANSFORMED_DATASET']):
         figname='_on_transformed_data'
         labelname='Evaluation on transformed data'        
@@ -235,7 +227,7 @@ def do_predictions(model_type= "VGG", multiple_plots=False):
     Plot of confusion matrix
     """
     utils.seed_generator(SEED=TRAINING_PARAMETERS['LOAD_SEED'])
-    train_dataloader,test_dataloader,classes = model_dataloader.create_dataloader(model_type=model_type, batch_size=TRAINING_PARAMETERS['BATCH_SIZE'], transform=TESTING_PARAMETERS['TRANSFORMED_DATASET'], amount_samples=HYPER_PARAMETERS['AMOUNT_SAMPLES'], window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
+    train_dataloader,test_dataloader,classes = model_dataloader.create_dataloader(model_type=model_type, batch_size=HYPER_PARAMETERS['BATCH_SIZE'], transform=HYPER_PARAMETERS['TRANSFORM'], amount_samples=HYPER_PARAMETERS['AMOUNT_SAMPLES'], window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
     model = model_builder.choose_model(model_type=model_type,output_shape=classes,device=device,window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
     model,_=utils.load_model(model= model, model_type=model_type, device=device, transform=TRANSFORMED_MODEL)
     
@@ -330,22 +322,6 @@ def print_metrics(y_pred,y_list,y_preds_percent,classes,model_type):
 
 
 
-
-
-#Plot Confusion_Matrix Helper functions
-def plot_confusionmatrix(confmat_tensor):
-    fig, ax = plot_confusion_matrix(
-        conf_mat=confmat_tensor.numpy(), # matplotlib likes working with NumPy 
-        class_names=range(confmat_tensor.shape[0]), # turn the row and column labels into class names
-        #figsize=(10, 7)
-    )
-
-def plot_conf_sklearn(y_pred_tensor, y_target_tensor, classes):
-    from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-    cm = confusion_matrix(y_target_tensor, y_pred_tensor, labels=range(classes))
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm,
-                                  display_labels=range(classes))
-    disp.plot()
 
 
 

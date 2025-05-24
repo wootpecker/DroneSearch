@@ -7,9 +7,11 @@ The repository includes scripts for data preprocessing, model building, training
 
 - Data transformation and augmentation ([data_transformations.py](data_transformations.py), [data_transformations_with_adequate_input.py](data_transformations_with_adequate_input.py))
 - Dataset creation ([create_dataset.py](create_dataset.py))
-- Model building and training ([model_builder.py](model_builder.py), [train_model.py](train_model.py))
+- Model building ([model_builder.py](model_builder.py))
 - Custom data loaders ([model_dataloader.py](model_dataloader.py))
-- Prediction and evaluation ([predictions.py](predictions.py), [engine.py](engine.py), [engine_encdec.py](engine_encdec.py))
+- Engine for training and testing step ([engine.py](engine.py), [engine_encdec.py](engine_encdec.py))
+- Main training class ([train_model.py](train_model.py))
+- Prediction and evaluation ([predictions.py](predictions.py))
 - Visualization of results ([plot_predictions.py](plot_predictions.py))
 - Utility functions ([utils.py](utils.py))
 
@@ -34,3 +36,7 @@ The repository includes scripts for data preprocessing, model building, training
     or skip to directly to training
 
 3. **Train the model**
+    python train_model.py
+
+4. **Make predictions**
+    python predictions.py
