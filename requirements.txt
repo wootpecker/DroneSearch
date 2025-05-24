@@ -1,0 +1,10 @@
+numpy
+pandas
+scikit-learn
+matplotlib
+torch
+torchvision
+tqdm
+#joblib
+#seaborn
+# Add any other dependencies specific to your scripts if needed

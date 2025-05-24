@@ -22,8 +22,6 @@ X_TRANSFORM_PROB=[0.5, 0.4, 0.6, 0.7]#Noise(50%),Sshape(40%),Cage(20%),Grid(10%)
 
 
 def main():
-    #create_dataloader_distinctive(batch_size=16)
-    #test()
     plot_for_BA(model_type=MODELS[1])
 
  #TESTING:
@@ -34,7 +32,7 @@ def plot_for_BA(model_type=MODELS[1]):
     COMMON_TRANSFORM_PROB = [0, 0, 0, 0, 0]
     X_TRANSFORM_PROB = [0, 0, 0, 0]
     utils.seed_generator(SEED=16923)
-    train_GDM,train_GSL,test_GDM,test_GSL=create_dataset.create_dataset(amount_samples=1,window_size=[64,64],save=False)
+    train_GDM,train_GSL,test_GDM,test_GSL=create_dataset.create_dataset(amount_samples=1,window_size=[64,64],save_dataset=False)
     train_dataset, test_dataset = load_reshape_dataset(model_type=model_type,transform=True, load=False, train_GDM=train_GDM, train_GSL=train_GSL, test_GDM=test_GDM, test_GSL=test_GSL)
     #train_dataset, test_dataset= load_reshape_dataset(model_type=model_type, transform=True, load=False)
     sample_number=1986
@@ -95,7 +93,7 @@ def create_dataloader(model_type=MODELS[0], batch_size=32, transform=True, mask=
     if amount_samples==0:
         train_dataset, test_dataset = load_reshape_dataset(model_type=model_type,transform=transform, load=True, train_GDM=None, train_GSL=None, test_GDM=None, test_GSL=None)
     else:
-        train_GDM,train_GSL,test_GDM,test_GSL=create_dataset.create_dataset(amount_samples=amount_samples,window_size=window_size,save=False)
+        train_GDM,train_GSL,test_GDM,test_GSL=create_dataset.create_dataset(amount_samples=amount_samples,window_size=window_size,save_dataset=False)
         train_dataset, test_dataset = load_reshape_dataset(model_type=model_type,transform=transform, load=False, train_GDM=train_GDM, train_GSL=train_GSL, test_GDM=test_GDM, test_GSL=test_GSL)
     classes=train_dataset.classes
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)

@@ -21,50 +21,67 @@ import random
 import pandas as pd
 import math
 import logging
-import ds4_train_model
+import train_model
 from pathlib import Path
 import os
 # Set device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 MODEL_TYPES = ["VGG8", "UnetS", "VGGVariation"]
 TRANSFORMED_MODEL=True
-HYPER_PARAMETERS = ds4_train_model.HYPER_PARAMETERS
-TRAINING_PARAMETERS = ds4_train_model.TRAINING_PARAMETERS
+HYPER_PARAMETERS = train_model.HYPER_PARAMETERS
+TRAINING_PARAMETERS = train_model.TRAINING_PARAMETERS
 
 
 #TRAINING_PARAMETERS['TEST_SEED'] = 16923
 #  and AMOUNT_SAMPLES=1 for images in BA Thesis
-HYPER_PARAMETERS['AMOUNT_SAMPLES'] = 16
-HYPER_PARAMETERS['TRANSFORM'] = True
+
 
 
 MODEL_TO_TEST=[HYPER_PARAMETERS['MODEL_TYPES'][0],HYPER_PARAMETERS['MODEL_TYPES'][1]]
 #MODEL_TO_TEST=[HYPER_PARAMETERS['MODEL_TYPES'][1]]
 
+TESTING_PARAMETERS = {
+              "TRANSFORMED_DATASET": False,
+               "MULTIPLE_PLOTS": True,
+               "PLOT_SETTINGS" : ["models","transform"],
+               "TEST_PLOT" : 0,
+               "PLOT_BA": True,
+               "TEST_SEED": 1009
+  }
+
+
+if TESTING_PARAMETERS['PLOT_BA']:
+    HYPER_PARAMETERS['AMOUNT_SAMPLES'] = 1
+    TRAINING_PARAMETERS['TEST_SEED'] = 16923
+else:
+    HYPER_PARAMETERS['AMOUNT_SAMPLES'] = 16
+
+
 
 def main():
     
     logger.logging_config(logs_save=False)
-    plot_models()
-    #plot_transform()
+    if TESTING_PARAMETERS['PLOT_SETTINGS'][TESTING_PARAMETERS['TEST_PLOT']]==TESTING_PARAMETERS['PLOT_SETTINGS'][0]:
+        plot_models()
+    else:
+        plot_transform()
 
 
-    #plot_transform(model_type=HYPER_PARAMETERS['MODEL_TYPES'][1])
 
 
 def plot_models():
+    logging.info(f"Plotting Models")
     result_dic=[]
     for model_type in MODEL_TO_TEST:
-        accuracy_results=do_predictions(model_type=model_type)
+        accuracy_results=do_predictions(model_type=model_type, multiple_plots=TESTING_PARAMETERS['MULTIPLE_PLOTS'])
         logging.info(f"[ACCURACY] Results: {accuracy_results}")
-        #print(accuracy_results)
         result_dic.append(accuracy_results)
     plot_model_accuracies(result_dic)
 
 
 
 def plot_model_accuracies(result_dic):
-    if(HYPER_PARAMETERS['TRANSFORM']):
+    if(TESTING_PARAMETERS['TRANSFORMED_DATASET']):
         figname='_on_transformed_data'
     else:
         figname='_on_original_data'    
@@ -82,11 +99,9 @@ def plot_model_accuracies(result_dic):
         model=result_dic[x]
         plt.plot(accuracy_amount, model['approximate_accuracy'], label=f'{MODEL_TO_TEST[x]}', color=f'C{x}')
     plt.plot(accuracy_amount, model['benchmark_aproximate_accuracy'], label='Benchmark', color='red')
-    # plt.plot(accuracy_amount, confidence, label='confidence')
-    plt.title('Approximate Accuracy', pad=10)
-    plt.ylabel('Accuracy', labelpad=5)
-    plt.xlabel('N', labelpad=5)
-    plt.legend(loc='best', fontsize='small')
+    plt.ylabel('Accuracy', labelpad=5, fontsize=14)
+    plt.xlabel('N', labelpad=5, fontsize=14)
+    plt.legend(loc='best', fontsize=14)
     plt.tight_layout()
     plt.savefig(target_dir_path / f'approximate_accuracy_model_comparison{figname}.pdf')
     #plt.show()
@@ -96,26 +111,21 @@ def plot_model_accuracies(result_dic):
         model=result_dic[x]
         plt.plot(accuracy_amount, model['topn_accuracy'], label=f'{MODEL_TO_TEST[x]}', color=f'C{x}')
     plt.plot(accuracy_amount, model['benchmark_topn_accuracy'], label='Benchmark', color='red')        
-    # plt.plot(accuracy_amount, confidence, label='confidence')
-    plt.title('Top N Accuracy', pad=10)
-    plt.ylabel('Accuracy', labelpad=5)
-    plt.xlabel('N', labelpad=5)
-    plt.legend(loc='best', fontsize='small')
+    plt.ylabel('Accuracy', labelpad=5, fontsize=14)
+    plt.xlabel('N', labelpad=5, fontsize=14)
+    plt.legend(loc='best', fontsize=14)
     plt.tight_layout()
     plt.savefig(target_dir_path / f'topn_accuracy_model_comparison{figname}.pdf')
-    #plt.show()
+
 
 
     plt.figure(figsize=(11, 5))
     for x in range(len(result_dic)):
         model=result_dic[x]
         plt.plot(accuracy_amount, model['confidence'], label=f'{MODEL_TO_TEST[x]}', color=f'C{x}')
-        #plt.plot(accuracy_amount, model['topn_accuracy'], label=f'{model["model_type"]} Top Values Accuracy')
-    # plt.plot(accuracy_amount, confidence, label='confidence')
-    plt.title('Confidence Comparison', pad=10)
-    plt.ylabel('Mean Percentage', labelpad=5)
-    plt.xlabel('N', labelpad=5)
-    plt.legend(loc='best', fontsize='small')
+    plt.ylabel('Mean Percentage', labelpad=5, fontsize=14)
+    plt.xlabel('N', labelpad=5, fontsize=14)    
+    plt.legend(loc='best', fontsize=14)
     plt.tight_layout()
     plt.savefig(target_dir_path / f'confidence_model_comparison{figname}.pdf')
 
@@ -125,15 +135,15 @@ def plot_model_accuracies(result_dic):
 
 
 def plot_transform():
+    logging.info(f"Plotting Transform Comparison")
     for model_type in MODEL_TO_TEST:
         result_dic=[]
         global TRANSFORMED_MODEL
         TRANSFORMED_MODEL=True
         for i in range(0,2):        
-            accuracy_results=do_predictions(model_type=model_type)
+            accuracy_results=do_predictions(model_type=model_type, make_plots=TESTING_PARAMETERS['MULTIPLE_PLOTS'])
             for accuracy in accuracy_results:
                 logging.info(f"[ACCURACY] {accuracy}")
-            #print(accuracy_results)
             result_dic.append(accuracy_results)
             TRANSFORMED_MODEL=False
         plot_transform_accuracies(result_dic, model_type)
@@ -142,7 +152,7 @@ def plot_transform():
 
 
 def plot_transform_accuracies(result_dic,model_type=HYPER_PARAMETERS['MODEL_TYPES'][0]):
-    if(HYPER_PARAMETERS['TRANSFORM']):
+    if(TESTING_PARAMETERS['TRANSFORMED_DATASET']):
         figname='_on_transformed_data'
         labelname='Evaluation on transformed data'        
     else:
@@ -212,7 +222,7 @@ def plot_transform_accuracies(result_dic,model_type=HYPER_PARAMETERS['MODEL_TYPE
 
 
 
-def do_predictions(model_type= "VGG"):
+def do_predictions(model_type= "VGG", multiple_plots=False):
     """Makes prediction with a model and plots 5 different test samples with respective results.
     
 
@@ -225,7 +235,7 @@ def do_predictions(model_type= "VGG"):
     Plot of confusion matrix
     """
     utils.seed_generator(SEED=TRAINING_PARAMETERS['LOAD_SEED'])
-    train_dataloader,test_dataloader,classes = model_dataloader.create_dataloader(model_type=model_type, batch_size=TRAINING_PARAMETERS['BATCH_SIZE'], transform=HYPER_PARAMETERS['TRANSFORM'], amount_samples=HYPER_PARAMETERS['AMOUNT_SAMPLES'], window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
+    train_dataloader,test_dataloader,classes = model_dataloader.create_dataloader(model_type=model_type, batch_size=TRAINING_PARAMETERS['BATCH_SIZE'], transform=TESTING_PARAMETERS['TRANSFORMED_DATASET'], amount_samples=HYPER_PARAMETERS['AMOUNT_SAMPLES'], window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
     model = model_builder.choose_model(model_type=model_type,output_shape=classes,device=device,window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
     model,_=utils.load_model(model= model, model_type=model_type, device=device, transform=TRANSFORMED_MODEL)
     
@@ -238,7 +248,7 @@ def do_predictions(model_type= "VGG"):
     accuracy_results['benchmark_topn_accuracy']=benchmark_topn_accuracy
     accuracy_results['benchmark_euclidean_distance']=benchmark_euclidean_distance
     y_list,y_logit_list,y_preds_percent=reshape_tensor(y_list=y_list,y_logit_list=y_logit_list,y_preds_percent=y_preds_percent)
-    make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent)  
+    make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent, multiple_plots=multiple_plots)  
     return accuracy_results
 
 
@@ -475,11 +485,15 @@ def calculate_accuracies(approx_y_true,approx_y_pred,topn_y_true,topn_y_pred,cla
 
 
 
-def make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
-    #make_trainingsample_plot(y_pred,X_list,y_list,y_logit_list,y_preds_percent)
-    make_plots_multiple(y_pred,X_list,y_list,y_logit_list,y_preds_percent)
+def make_plots(y_pred,X_list,y_list,y_logit_list,y_preds_percent, multiple_plots=False):
+    if multiple_plots:
+        make_plots_multiple(y_pred,X_list,y_list,y_logit_list,y_preds_percent)
+    else:
+        make_plots_trainingsample(y_pred,X_list,y_list,y_logit_list,y_preds_percent)
 
-def make_trainingsample_plot(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
+        #make_trainingsample_plot2x2(y_pred,X_list,y_list,y_logit_list,y_preds_percent)
+
+def make_plots_trainingsample(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
     #def show_as_image_sequence_batch(dataset, predicted_dataset):
     #results=[X_list,y_list,y_logit_list,y_preds_percent]
     y_list,y_logit_list,y_preds_percent=reshape_tensor(y_list,y_logit_list,y_preds_percent)
@@ -535,7 +549,50 @@ def make_trainingsample_plot(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
     plt.savefig(output_dir / "training_sample.pdf")
     plt.show()
 
-
+def make_trainingsample_plot2x2(y_pred, X_list, y_list, y_logit_list, y_preds_percent):
+    # Reshape tensors if needed
+    y_list, y_logit_list, y_preds_percent = reshape_tensor(y_list, y_logit_list, y_preds_percent)
+    size = [2, 2]
+    fig_width = 2 * 4  # 2 columns × 4 inches per image
+    fig_height = 2 * 4  # 2 rows × 4 inches per image
+    f, arr = plt.subplots(size[0], size[1], figsize=(fig_width, fig_height))
+    random_samples = random.sample(range(X_list.shape[0]), k=5)
+    for j in range(len(random_samples)):
+        i = random_samples[j]
+        row, col = divmod(j, 2)
+        if j == 0:
+            arr[row, col].imshow(X_list[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
+            arr[row, col].set_title("Input (X)", fontsize=18)
+        elif j == 1:
+            arr[row, col].imshow(y_list[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
+            arr[row, col].set_title("Target (y)", fontsize=18)
+        elif j == 2:
+            arr[row, col].imshow(y_logit_list[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
+            arr[row, col].set_title("Output of Model (y_logit)", fontsize=18)
+        elif j == 3:
+            arr[row, col].imshow(y_preds_percent[i].squeeze(0).unsqueeze(-1).numpy(), origin="lower")
+            arr[row, col].set_title("Prediction of Model", fontsize=18)
+            y_target, x_target = divmod(y_list[i].argmax().item(), X_list[i].shape[-1])
+            y_pred_val, x_pred = divmod(y_preds_percent[i].argmax().item(), X_list[i].shape[-1])
+            color = 'green' if (y_target == y_pred_val and x_target == x_pred) else 'red'
+            arr[row, col].plot(x_target, y_target, marker="*", markersize=10, markeredgecolor=color, markerfacecolor=color)
+        arr[row, col].set_xlabel("x (dm)", fontsize=14)
+        arr[row, col].set_ylabel("y (dm)", fontsize=14)
+        arr[row, col].set_xticks(range(0, X_list[i].shape[-1], 10))
+        arr[row, col].set_yticks(range(0, X_list[i].shape[-1], 10))
+        arr[row, col].tick_params(axis='x', labelsize=14)
+        arr[row, col].tick_params(axis='y', labelsize=14)
+        arr[row, col].label_outer()
+    # Hide the unused subplot (the 5th one in 2x2 grid)
+    if len(random_samples) < 4:
+        for j in range(len(random_samples), 4):
+            row, col = divmod(j, 2)
+            f.delaxes(arr[row, col])
+    plt.tight_layout()
+    output_dir = Path("results/images")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_dir / "training_sample_2x2.pdf")
+    plt.show()
 
 def make_plots_multiple(y_pred,X_list,y_list,y_logit_list,y_preds_percent):
     #def show_as_image_sequence_batch(dataset, predicted_dataset):

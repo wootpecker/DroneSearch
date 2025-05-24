@@ -3,10 +3,8 @@ Contains functions for training and testing a PyTorch model.
 """
 import torch
 import utils
-import random
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
-import numpy
 import logging
 
 def train_step(model: torch.nn.Module, 

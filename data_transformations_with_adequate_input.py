@@ -1,6 +1,65 @@
-from torchvision import transforms
-import torch
-import utils
+"""
+data_transformations_with_adequate_input.py
+This module provides a collection of data transformation classes and helper functions for augmenting and manipulating grid-like tensor data, 
+particularly for use in training machine learning models.
+This class has been used for testing purposes, but it is not used in the main code.
+Furthermore, it has been used to test the adequacy of the input data for the training of the model.
+
+-----------------------------
+Classes:
+- RotationTransform: Rotates both input and target tensors by a specified angle.
+- NoiseTransform: Applies random additive or multiplicative Gaussian noise to a tensor.
+- SshapeTransform: Applies an S-shaped sampling pattern to the input tensor.
+- GridTransform: Applies a grid-based sampling pattern to the input tensor.
+- CageTransform: Applies a cage-like sampling pattern to the input tensor.
+- RandomTransform: Applies a random sampling pattern to the input tensor.
+
+-----------------------------
+Helper Functions:
+- generate_coordinates_s_shape: 
+    Generates coordinates in an S-shaped pattern.
+
+- generate_coordinates_cage: 
+    Generates coordinates in a cage-like pattern.
+
+- generate_coordinates_grid: 
+    Generates coordinates in a grid pattern.
+
+- transform_input: 
+    Applies a coordinate-based mask to the input tensor, transforming the grid with the generated patterns.
+
+- generate_coordinates_random: 
+    Generates random coordinates within the grid. Creating random activations has been ultimately discarded.    
+
+- generate_mask: 
+    Creates a binary mask tensor from coordinates. Creating masks has been ultimately discarded.
+
+- generate_no_mask: 
+    Creates a mask tensor with all ones. Creating masks has been ultimately discarded.
+
+- adequate_input: 
+    Creates a threshold for data transformation, ensuring that the transformed data meets a minimum activation criteria.
+    Criteria includes a minimum number of activated points in the transformed tensor, that are over a threshold value.
+    
+-----------------------------
+Testing Functions:
+- test_noise: Tests the NoiseTransform class by applying noise to a tensor and plotting the result.
+- test_sshape_cage: Tests S-shape and cage coordinate generation and transformation.
+- test_input: Tests cage coordinate generation and transformation.
+- test_dimesions: Tests S-shape coordinate generation for various distances and paddings.
+- test_transform: Tests the RandomTransform class on a tensor.
+
+-----------------------------
+Dependencies:
+- torch, torchvision.transforms, random
+
+-----------------------------
+Usage:
+- Import and use the transformation classes during training to increase sample variety.
+"""
+
+
+
 from torchvision import transforms
 import torch
 import utils

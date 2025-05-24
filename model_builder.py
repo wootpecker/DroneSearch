@@ -19,7 +19,6 @@ def choose_model(model_type=MODELS[0], output_shape=1, device="cuda", input_shap
     model = VGG8(output_shape=output_shape,input_shape=input_shape,window_size=window_size).to(device)
   elif(model_type==MODELS[1]):
     output_shape=1
-    #input
     model = UnetS(output_shape=output_shape,input_shape=input_shape).to(device)
   elif(model_type==MODELS[2]):
      model = VGGVariation(output_shape=output_shape,input_shape=input_shape,window_size=window_size).to(device)
@@ -102,7 +101,7 @@ class VGG8(nn.Module):
 
 
 class UnetS(nn.Module):
-    """Creates the VGGVariation architecture based on input with at least 24*24 input.
+    """Creates the VGGVariation architecture based on 64*64 input.
     Args:
     input_shape(int): An integer indicating number of input channels (default 1 channel).
     output_shape(int): An integer indicating number of classes.

@@ -1,6 +1,30 @@
+"""
+logger.py
+
+This module provides logging configuration utilities for the DroneSearch project.
+It allows for flexible logging setup, including saving logs to files with customizable filenames
+based on training parameters, or simply logging to the console.
+
+Dependencies:
+- logging, os, pathlib, math, logging
+
+Functions:
+- logging_config(logs_save=True, amount_samples=4, transform=True, model_type="EncoderDecoder", window_size=[64,64], filename=None):
+    Configures the logging system. If logs_save is True, logs are saved to a file in the logs/files directory,
+    with the filename reflecting the training configuration. Otherwise, logs are output to the console.
+
+- main():
+    Example entry point that initializes logging with logs_save disabled for testing purposes.
+
+Usage:
+    Import and call logging_config() at the start of your script to set up logging as needed.
+
+"""
+
 import logging
 import os
 from pathlib import Path
+#from logger import logging_config
  
 
 def main():
