@@ -77,7 +77,7 @@ HYPER_PARAMETERS = {
 TRAINING_PARAMETERS = {
                "MODEL_TYPES": ["VGG8", "UnetS"],
                "TRAIN_MODEL": 1,         # 0 for VGG8, 1 for UnetS
-               "LOGS_SAVE": False,
+               "LOGS_SAVE": False,       # Save logs to file or show in console, when training preferred to set to True (better overview and additional logs for later analysis)
                "SAVE_DATASET": False,
                "RESET_TRAINING": False,  # Reset training to start from scratch
                "LOAD_SEED": 16923,
