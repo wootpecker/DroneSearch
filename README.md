@@ -39,7 +39,7 @@ The repository includes scripts for data preprocessing, model building, training
 3. **Train the model**<br/>
     Train model with:<br/>
     python train_model.py<br/>
-    Alternatively, place one or more CPU or GPU models into the DroneSearch/model directory to bypass the training phase and proceed to the make predictions
+    Alternatively, place one or more CPU or GPU models into the DroneSearch/model directory(while retaining the folder structure) to bypass the training phase and proceed to the make predictions
 
 4. **Make predictions**
     Choose parameters or use default values by running:<br/>
