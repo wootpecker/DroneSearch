@@ -4,25 +4,39 @@ model_dataloader.py
 This module provides data loading and data transformation utilities during training of machine learning models in the DroneSearch project. 
 It supports multiple model architectures (VGG8, UnetS, VGGVariation), X Transformations and Common Transformations.
 
-Key Features:
 -----------------------------
-- Defines common and custom data augmentation transforms, with configurable probabilities.
-- Provides dataset classes (EncDecDataset, VGGDataset) for different model types, supporting paired
-    transformations on both input and target data.
-- Implements functions to create and load datasets and dataloaders, with options for on-the-fly or
-    pre-saved data.
-- Includes visualization utilities for inspecting the effect of augmentations.
-- Integrates logging for tracking data pipeline configuration and transformations.
+Constants:
+- MODELS (list): List of model types supported by the dataloader.
+- COMMON_TRANSFORM (list): List of Common Transformations applied to the dataset.
+- COMMON_TRANSFORM_PROB (list): List of probabilities for each Common Transformation.
+- X_TRANSFORM (list): List of X Transformations applied to the dataset.
+- X_TRANSFORM_PROB (list): List of probabilities for each X Transformation.
 
-Main Components:
 -----------------------------
-- MODELS: List of supported model types.
-- COMMON_TRANSFORM, X_TRANSFORM: Lists of torchvision and custom transforms for data augmentation.
-- create_dataloader: Factory function to create PyTorch DataLoader objects for training and testing.
-- load_reshape_dataset: Loads and reshapes datasets according to the selected model type and transformation settings.
-- EncDecDataset, VGGDataset: Custom Dataset classes implementing __getitem__ with probabilistic augmentation.
-- Utility functions for logging and string representation of applied transforms.
-- plot_for_BA: Visualization function for inspecting augmentations.
+Functions:
+- main(): 
+    Used for testing and visualizing the effect of data transformation.
+
+- create_dataloader(model_type, batch_size, transform, mask, amount_samples, window_size): 
+    Creates PyTorch DataLoader objects for training and testing.
+
+- load_reshape_dataset(model_type, transform, load, train_GDM, train_GSL, test_GDM, test_GSL):
+    Loads and reshapes datasets according to the selected model type and transformation settings.
+
+- common_transform_to_str(common_transform):
+    Converts the common transformation list into a string representation for logging.
+
+- x_transform_to_str(x_transform):
+    Converts the X transformation list into a string representation for logging.  
+
+- plot_for_BA(model_type):
+    Visualization function for inspecting the effect of augmentations on a sample from the dataset.      
+
+-----------------------------
+Classes:
+- EncDecDataset, VGGDataset:
+    Custom Dataset classes implementing probabilistic data transformation.
+    EncDecDataset is used for U-NetS models, while VGGDataset is used for VGG-8 models.
 
 -----------------------------
 Dependencies:
@@ -50,7 +64,7 @@ import create_dataset
 import matplotlib.pyplot as plt
 from logs import logger
 
-MODELS = ["VGG8", "UnetS", "VGGVariation"]
+MODELS = ["VGG8", "UnetS", "VGGVariation"] # VGGVariaton as test purposes
 COMMON_TRANSFORM=[transforms.RandomHorizontalFlip(p=1), transforms.RandomVerticalFlip(p=1), data_transformations.RotationTransform(rotation_angle=90),data_transformations.RotationTransform(rotation_angle=180),data_transformations.RotationTransform(rotation_angle=270)]
 COMMON_TRANSFORM_PROB=[0.5, 0.5, 0.25, 0.5, 0.75]#HorizontalFlip(50%),VerticalFlip(50%),Rotation90(25%),Rotation180(25%),Rotation270(25%)
 X_TRANSFORM=[data_transformations.NoiseTransform(),data_transformations.SshapeTransform(),data_transformations.CageTransform(),data_transformations.GridTransform()]
@@ -64,55 +78,7 @@ X_TRANSFORM_PROB=[0.5, 0.4, 0.6, 0.7]#Noise(50%),Sshape(40%),Cage(20%),Grid(10%)
 def main():
     plot_for_BA(model_type=MODELS[1])
 
- #TESTING:
-
-def plot_for_BA(model_type=MODELS[1]):
-    logger.logging_config(logs_save=False)
-    global COMMON_TRANSFORM_PROB, X_TRANSFORM_PROB
-    COMMON_TRANSFORM_PROB = [0, 0, 0, 0, 0]
-    X_TRANSFORM_PROB = [0, 0, 0, 0]
-    utils.seed_generator(SEED=16923)
-    train_GDM,train_GSL,test_GDM,test_GSL=create_dataset.create_dataset(amount_samples=1,window_size=[64,64],save_dataset=False)
-    train_dataset, test_dataset = load_reshape_dataset(model_type=model_type,transform=True, load=False, train_GDM=train_GDM, train_GSL=train_GSL, test_GDM=test_GDM, test_GSL=test_GSL)
-    #train_dataset, test_dataset= load_reshape_dataset(model_type=model_type, transform=True, load=False)
-    sample_number=1986
-    size=[1,4]
-    fig_width = 4 * 4  # 4 columns × 4 inches per image
-    fig_height =  4  # 1 rows × 4 inches per image
-    f, arr = plt.subplots(size[0],size[1], figsize=(fig_width, fig_height), tight_layout=True)
-    for j in range(arr.shape[0]):
-        #print(i)
-        
-        titles=["Original","Horizontal Flip","Vertical Flip","Rotation90","Rotation180","Rotation270"]#flip
-        titles=["Original","Clockwise Rotation by 90°","Clockwise Rotation by 180°","Clockwise Rotation by 270°"]
-        titles=["Original","with Additive Noise","with Multiplicative Noise"]
-        titles=["Original","S-shaped Transform","Cage-shaped Transform","Grid Transform"]
-        arr[j].set_title(f"{titles[j]}")
-        arr[j].set_xlabel("x (dm)")
-        arr[j].label_outer()  # Only show outer labels to add a small padding effect
-        arr[j].set_ylabel("y (dm)")                          
-
-
-        X_TRANSFORM_PROB=[0,0,0,0,0]
-        if j!=0:        
-            X_TRANSFORM_PROB[j]=1
-            arr[j].set_ylabel("")
-
-        COMMON_TRANSFORM_PROB=[0,0,0,0,0]
-        if j!=0:        
-            COMMON_TRANSFORM_PROB[j+1]=0
-            arr[j].set_ylabel("")
-        
-        sample=test_dataset.__getitem__(sample_number)
-        arr[j].imshow(sample[0].squeeze(0).unsqueeze(-1).numpy(), origin="lower")        
-
-
-
-    f.subplots_adjust(hspace =0.4)
-   # f.tight_layout()
-    plt.subplots_adjust(hspace =0.4)
-    plt.show()
-
+ 
 
 
 
@@ -337,6 +303,58 @@ def x_transform_to_str(x_transform):
     if any(isinstance(transform, data_transformations.GridTransform) for transform in x_transform):
         x_transform_str.append(f"Grid: {int(round((X_TRANSFORM_PROB[3]-X_TRANSFORM_PROB[2])*100))}%,")       
     return x_transform_str    
+
+
+#TESTING:
+
+def plot_for_BA(model_type=MODELS[1]):
+    logger.logging_config(logs_save=False)
+    global COMMON_TRANSFORM_PROB, X_TRANSFORM_PROB
+    COMMON_TRANSFORM_PROB = [0, 0, 0, 0, 0]
+    X_TRANSFORM_PROB = [0, 0, 0, 0]
+    utils.seed_generator(SEED=16923)
+    train_GDM,train_GSL,test_GDM,test_GSL=create_dataset.create_dataset(amount_samples=1,window_size=[64,64],save_dataset=False)
+    train_dataset, test_dataset = load_reshape_dataset(model_type=model_type,transform=True, load=False, train_GDM=train_GDM, train_GSL=train_GSL, test_GDM=test_GDM, test_GSL=test_GSL)
+    #train_dataset, test_dataset= load_reshape_dataset(model_type=model_type, transform=True, load=False)
+    sample_number=1986
+    size=[1,4]
+    fig_width = 4 * 4  # 4 columns × 4 inches per image
+    fig_height =  4  # 1 rows × 4 inches per image
+    f, arr = plt.subplots(size[0],size[1], figsize=(fig_width, fig_height), tight_layout=True)
+    for j in range(arr.shape[0]):
+        #print(i)
+        
+        titles=["Original","Horizontal Flip","Vertical Flip","Rotation90","Rotation180","Rotation270"]#flip
+        titles=["Original","Clockwise Rotation by 90°","Clockwise Rotation by 180°","Clockwise Rotation by 270°"]
+        titles=["Original","with Additive Noise","with Multiplicative Noise"]
+        titles=["Original","S-shaped Transform","Cage-shaped Transform","Grid Transform"]
+        arr[j].set_title(f"{titles[j]}")
+        arr[j].set_xlabel("x (dm)")
+        arr[j].label_outer()  # Only show outer labels to add a small padding effect
+        arr[j].set_ylabel("y (dm)")                          
+
+
+        X_TRANSFORM_PROB=[0,0,0,0,0]
+        if j!=0:        
+            X_TRANSFORM_PROB[j]=1
+            arr[j].set_ylabel("")
+
+        COMMON_TRANSFORM_PROB=[0,0,0,0,0]
+        if j!=0:        
+            COMMON_TRANSFORM_PROB[j+1]=0
+            arr[j].set_ylabel("")
+        
+        sample=test_dataset.__getitem__(sample_number)
+        arr[j].imshow(sample[0].squeeze(0).unsqueeze(-1).numpy(), origin="lower")        
+
+
+
+    f.subplots_adjust(hspace =0.4)
+   # f.tight_layout()
+    plt.subplots_adjust(hspace =0.4)
+    plt.show()
+
+
 
 
 

@@ -253,7 +253,7 @@ def train(model: torch.nn.Module,
             logging.info(f"[TRAINING] Elapsed: {elapsed_str} | Epoch Duration: {epoch_duration_str}")
             
             utils.save_model(model=model,model_type=model_name,epoch=epoch+1,device=device,transform=transform)        
-            utils.save_random(model_name,epoch+1,device)
+            utils.save_random(model_name,epoch+1,device, transform=transform)
             utils.save_loss(results,model_name,device)
 
 

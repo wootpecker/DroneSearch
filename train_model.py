@@ -33,17 +33,17 @@ Testing Hyperparameters:
 - WINDOW_SIZE (list of int): Size of the window to use for data augmentation.
 
 Constants:
-- device (str): Target device for training (CPU or CUDA). [Training has been performed on GPU -> models from repository are trained on GPU]
+- device (str): Target device for training (CPU or CUDA). [Training has been performed on GPU -> 9x times faster than CPU training]]
 
 -----------------------------
 Functions:
 - main():
-    Initializes logging and starts the training process for the selected model.
+  Initializes logging and starts the training process for the selected model.
 
 - train_all_models(model_type, transform):
-    Trains the specified model type with the given transformations.
-    Sets up the dataloader, model, optimizer, and loss function.
-    Handles training and testing of the model, logging results and plotting loss curves.
+  Trains the specified model type with the given transformations.
+  Sets up the dataloader, model, optimizer, and loss function.
+  Handles training and testing of the model, logging results and plotting loss curves.
 
 -----------------------------    
 Dependencies:
