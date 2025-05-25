@@ -16,8 +16,8 @@ Testing Parameters:
 - TEST_PLOT (int): 0 for model comparison, 1 for transform comparison.
 - PLOT_BA (bool): Whether to plot specific samples used for images.
 - TEST_SEED (int): Random seed for reproducibility in testing.
-- PLOT_1_MODEL (bool): If True, only one model is plotted.
-- PLOT_1_MODEL_TYPE (int): Model to plot if PLOT_1_MODEL is True, 0 for VGG8, 1 for UnetS.
+- PLOT_1_MODEL (bool): If True, only one model is evaluated.
+- PLOT_1_MODEL_TYPE (int): Model to evaluate if PLOT_1_MODEL is True, 0 for VGG8, 1 for UnetS.
 
 Training Parameters:
 - Identical to train_model.py
@@ -117,14 +117,14 @@ TESTING_PARAMETERS = {
                "TEST_PLOT" : 0,                           # 0: Plot Models Comparison, 1: Plot Transform Comparison
                "PLOT_BA": True,                           # If True, specific samples used for images are plotted        
                "TEST_SEED": 1009,                         # Random seed for reproducibility in testing
-               "PLOT_1_MODEL": False,                     # If True, only one model is plotted
+               "PLOT_1_MODEL": True,                     # If True, only one model is plotted
                "PLOT_1_MODEL_TYPE": 1,                    # Model to plot if PLOT_1_MODEL is True, 0: VGG8, 1: UnetS
   }
 
 
 
 if TESTING_PARAMETERS['PLOT_1_MODEL']:
-    TRAINING_PARAMETERS['MODEL_TYPES']= TRAINING_PARAMETERS['MODEL_TYPES'][TESTING_PARAMETERS['PLOT_1_MODEL_TYPE']]
+    TRAINING_PARAMETERS['MODEL_TYPES']= [TRAINING_PARAMETERS['MODEL_TYPES'][TESTING_PARAMETERS['PLOT_1_MODEL_TYPE']]]
 
 if TESTING_PARAMETERS['PLOT_BA']:
     HYPER_PARAMETERS['AMOUNT_SAMPLES'] = 1
