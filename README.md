@@ -3,21 +3,23 @@
 DroneSearch is a machine learning project for analyzing and predicting simulation data for implementation in real-world experiments using a nano-drone.
 The repository includes scripts for data preprocessing, model building, training, evaluation, and visualization.
 
-## Features
+## Main Features
 
 - Main training class ([train_model.py](train_model.py))
 - Prediction and evaluation ([predictions.py](predictions.py))
+
+## Helper
+
 - Data transformation and augmentation ([data_transformations.py](data_transformations.py), [data_transformations_with_adequate_input.py](data_transformations_with_adequate_input.py))
 - Dataset creation ([create_dataset.py](create_dataset.py))
 - Model building ([model_builder.py](model_builder.py))
 - Custom data loaders ([model_dataloader.py](model_dataloader.py))
 - Engine for training and testing step ([engine.py](engine.py), [engine_encdec.py](engine_encdec.py))
-- Visualization of results ([plot_predictions.py](plot_predictions.py))
 - Utility functions ([utils.py](utils.py))
 
 ## Directory Structure
 
-- `data/` - Raw and processed datasets
+- `data/` - Raw and processed datasets, add files from https://tubcloud.tu-berlin.de/s/yN3GjMwsJ8QRSom
 - `helper/` - Helper scripts for creating dataset
 - `logs/` - Training and evaluation logs
 - `model/` - Saved models and checkpoints
