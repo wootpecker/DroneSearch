@@ -199,7 +199,7 @@ def train(model: torch.nn.Module,
     model.to(device)
     model_name = type(model).__name__
     model,start=utils.load_model(model=model,model_type=model_name,device=device,transform=transform)
-    start2=utils.load_random(model_type=model_name,device=device)
+    start2=utils.load_random(model_type=model_name,device=device, transform=transform)
     if(start!=start2):
         print("[ERROR] Start not the same!")
         return
@@ -237,7 +237,7 @@ def train(model: torch.nn.Module,
             logging.info(f"[TRAINING] Elapsed: {elapsed_str} | Epoch Duration: {epoch_duration_str}")
             
             utils.save_model(model=model,model_type=model_name,epoch=epoch+1,device=device,transform=transform)        
-            utils.save_random(model_name,epoch+1,device)
+            utils.save_random(model_name,epoch+1,device, transform=transform)
             utils.save_loss(results,model_name,device)
 
     # Return the filled results at the end of the epochs

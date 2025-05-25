@@ -315,7 +315,7 @@ def load_model(model: torch.nn.Module, model_type: str, device="cuda", transform
 
 
 
-def save_random(model_type: str, epoch=None, device="cuda"):
+def save_random(model_type: str, epoch=None, device="cuda", transform=True):
   """
   Saves a the random state to a target directory.
   Args:
@@ -324,10 +324,12 @@ def save_random(model_type: str, epoch=None, device="cuda"):
     device: A target device to compute on (e.g. "cuda" or "cpu").
   """
   # Create target directory
-  target_dir_path = Path(f"data/random_state")
-  target_dir_path.mkdir(parents=True, exist_ok=True)
-  target_dir_path = Path(f"data/random_state/{model_type}")
-  target_dir_path.mkdir(parents=True, exist_ok=True)
+  if transform:
+    target_dir_path = Path(f"data/random_state/transform/{model_type}")
+  else:
+    target_dir_path = Path(f"data/random_state/original/{model_type}")
+  target_dir_path.mkdir(parents=True, exist_ok=True)    
+
   # Create random state dictionary
   if device == "cuda":
     rng_state_dict = {
@@ -355,7 +357,7 @@ def save_random(model_type: str, epoch=None, device="cuda"):
 
 
 
-def load_random(model_type: str, epoch=None, device="cuda"):
+def load_random(model_type: str, epoch=None, device="cuda", transform=True):
   """
   Loads the last random state from target directory.
   Args:
@@ -366,10 +368,11 @@ def load_random(model_type: str, epoch=None, device="cuda"):
     start: An integer indicating the number of epochs the model has been trained for.
   """
   # Create target directory
-  target_dir_path = Path(f"data/random_state")
-  target_dir_path.mkdir(parents=True, exist_ok=True)
-  target_dir_path = Path(f"data/random_state/{model_type}")
-  target_dir_path.mkdir(parents=True, exist_ok=True)
+  if transform:
+    target_dir_path = Path(f"data/random_state/transform/{model_type}")
+  else:
+    target_dir_path = Path(f"data/random_state/original/{model_type}")
+  target_dir_path.mkdir(parents=True, exist_ok=True) 
   files=os.listdir(target_dir_path)
   
   if len(files)==0:

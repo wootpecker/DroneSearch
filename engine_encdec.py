@@ -215,7 +215,7 @@ def train(model: torch.nn.Module,
     model.to(device)
     model_name = type(model).__name__
     model,start=utils.load_model(model=model,model_type=model_name,device=device,transform=transform)
-    start2=utils.load_random(model_type=model_name,device=device)
+    start2=utils.load_random(model_type=model_name,device=device, transform=transform)
     if(start!=start2):
         print("[ERROR] Start not the same!")
         return

@@ -33,7 +33,7 @@ Helper Functions:
     Creates a binary mask tensor from coordinates. Creating masks has been ultimately discarded.
 
 - generate_no_mask: 
-    Creates a mask tensor with all ones. Creating masks has been ultimately discarded.
+    Creates a mask tensor with all ones for complete gas distribution maps. Creating masks has been ultimately discarded.
 
 -----------------------------
 Dependencies:
