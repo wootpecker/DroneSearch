@@ -32,7 +32,7 @@ The repository includes scripts for data preprocessing, model building, training
    My advice: install pytorch from https://pytorch.org/get-started/locally/ for enabling GPU
 
 2. **Prepare the dataset**<br/>
-    Place your raw data in the DroneSearch/data directory (works with original or datasets_tensor)<br/>
+    Place your raw data in the DroneSearch/data directory (both original and datasets_tensor)<br/>
     Skip to training or run:<br/>
     python create_dataset.py
 

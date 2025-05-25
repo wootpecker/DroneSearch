@@ -87,10 +87,10 @@ TRAINING_PARAMETERS = {
 
 
 TESTING_HYPERPARAMETERS = {
-              "HYPERPARAMETER_OPTIMIZATION": False,
+              "HYPERPARAMETER_OPTIMIZATION": True,
               "BATCH_SIZE" : [16, 32, 64, 128, 256],
               "LEARNING_RATE": [0.001, 0.01, 0.1, 1.0],
-              "AMOUNT_SAMPLES": 8,
+              "AMOUNT_SAMPLES": 1,
               "WINDOW_SIZE": [64, 64],
   }
 
