@@ -9,12 +9,12 @@ Constants:
   Available model types for selection. ["VGG8", "UnetS"]  
   ["VGGVariation", "SimpleEncDec"] models are variatons for testing purposes.
 
---------------------------------------------------------------------------------
+-----------------------------
 Functions:
 - choose_model(model_type, output_shape, device, input_shape, window_size):
   Returns the selected model architecture, initialized with the specified parameters.
 
---------------------------------------------------------------------------------
+-----------------------------
 Classes:
 - VGG8:            A compact VGG-style convolutional neural network for classification.
 - UnetS:           A U-Net style encoder-decoder network for segmentation, with skip connections and dropout.
@@ -22,11 +22,11 @@ Classes:
 - VGGVariation:    A deeper VGG-style network with additional fully connected layers and dropout (for testing purposes).
 - SimpleEncDec:    A minimal encoder-decoder network for quick prototyping (for testing purposes).
 
---------------------------------------------------------------------------------
+-----------------------------
 Dependencies:
 - torch, logging
 
---------------------------------------------------------------------------------
+-----------------------------
 Usage:
 - Import this module in training scripts or testing scripts to create an instance of a machine learning model.
 """

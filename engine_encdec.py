@@ -4,7 +4,7 @@ This module provides core training and evaluation routines for the U-NetS model,
 specifically tailored for segmentation tasks in the DroneSearch project.
 Part of this code has been implemented from: https://www.learnpytorch.io/05_pytorch_going_modular/
 
---------------------------------------------------------------------------------
+-----------------------------
 Functions:
 - train_step(model, dataloader, loss_fn, optimizer, device): 
     Executes a single training epoch, updating model weights and tracking loss/accuracy.
@@ -18,12 +18,12 @@ Functions:
 - approximate_accuracy(y_true, y_predicted, height, distance): 
     Computes accuracy allowing for spatial tolerance, useful for segmentation/localization tasks.
 
---------------------------------------------------------------------------------
+-----------------------------
 Dependencies:
 - torch, tqdm, typing, logging
 - Custom modules: utils
 
---------------------------------------------------------------------------------
+-----------------------------
 Usage:
 - Import this module in training scripts to leverage standardized training and evaluation routines.
 """

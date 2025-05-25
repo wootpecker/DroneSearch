@@ -1,3 +1,43 @@
+"""
+model_dataloader.py
+
+This module provides data loading and data transformation utilities during training of machine learning models in the DroneSearch project. 
+It supports multiple model architectures (VGG8, UnetS, VGGVariation), X Transformations and Common Transformations.
+
+Key Features:
+-----------------------------
+- Defines common and custom data augmentation transforms, with configurable probabilities.
+- Provides dataset classes (EncDecDataset, VGGDataset) for different model types, supporting paired
+    transformations on both input and target data.
+- Implements functions to create and load datasets and dataloaders, with options for on-the-fly or
+    pre-saved data.
+- Includes visualization utilities for inspecting the effect of augmentations.
+- Integrates logging for tracking data pipeline configuration and transformations.
+
+Main Components:
+-----------------------------
+- MODELS: List of supported model types.
+- COMMON_TRANSFORM, X_TRANSFORM: Lists of torchvision and custom transforms for data augmentation.
+- create_dataloader: Factory function to create PyTorch DataLoader objects for training and testing.
+- load_reshape_dataset: Loads and reshapes datasets according to the selected model type and transformation settings.
+- EncDecDataset, VGGDataset: Custom Dataset classes implementing __getitem__ with probabilistic augmentation.
+- Utility functions for logging and string representation of applied transforms.
+- plot_for_BA: Visualization function for inspecting augmentations.
+
+-----------------------------
+Dependencies:
+- torch, logging, timeit, torchvision, matplotlib
+- Custom modules: utils, data_transformations, create_dataset, logs.logger
+
+-----------------------------
+Usage:
+- Run this module directly to visualize augmentations:
+        python model_dataloader.py
+
+- Import and use create_dataloader or load_reshape_dataset in training scripts to obtain datasets and dataloaders.
+"""
+
+
 
 from torch.utils.data import Dataset, DataLoader, random_split
 import torch
@@ -11,11 +51,10 @@ import matplotlib.pyplot as plt
 from logs import logger
 
 MODELS = ["VGG8", "UnetS", "VGGVariation"]
-DATASETS=["train","test"]
 COMMON_TRANSFORM=[transforms.RandomHorizontalFlip(p=1), transforms.RandomVerticalFlip(p=1), data_transformations.RotationTransform(rotation_angle=90),data_transformations.RotationTransform(rotation_angle=180),data_transformations.RotationTransform(rotation_angle=270)]
 COMMON_TRANSFORM_PROB=[0.5, 0.5, 0.25, 0.5, 0.75]#HorizontalFlip(50%),VerticalFlip(50%),Rotation90(25%),Rotation180(25%),Rotation270(25%)
 X_TRANSFORM=[data_transformations.NoiseTransform(),data_transformations.SshapeTransform(),data_transformations.CageTransform(),data_transformations.GridTransform()]
-#X_TRANSFORM=[]
+#X_TRANSFORM=[] # for testing purposes -> only common transformations
 X_TRANSFORM_PROB=[0.5, 0.4, 0.6, 0.7]#Noise(50%),Sshape(40%),Cage(20%),Grid(10%)
 
 
@@ -116,8 +155,9 @@ def load_reshape_dataset(model_type=MODELS[0],transform=True, load=True, train_G
     test_dataset(Dataset): The Testing Dataset.
     """
     if load:
-        train_GDM,train_GSL = utils.load_dataset(dataset_name=DATASETS[0], augmented=True)
-        test_GDM,test_GSL = utils.load_dataset(dataset_name=DATASETS[1], augmented=True)
+        datasets=["train","test"]
+        train_GDM,train_GSL = utils.load_dataset(dataset_name=datasets[0], augmented=True)
+        test_GDM,test_GSL = utils.load_dataset(dataset_name=datasets[1], augmented=True)
     classes=1
     common_transform = COMMON_TRANSFORM
     x_transform= X_TRANSFORM#data_transformations.RandomTransform()]
