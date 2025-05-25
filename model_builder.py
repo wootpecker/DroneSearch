@@ -1,4 +1,3 @@
-
 """
 model_builder.py
 This module defines a set of neural network architectures and a selection of these models for the DroneSearch project.

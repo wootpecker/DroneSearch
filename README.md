@@ -27,18 +27,18 @@ The repository includes scripts for data preprocessing, model building, training
 ## Getting Started
 
 1. **Install dependencies**  
-   Make sure you have Python 3.8+ installed.   Install required packages:
-   pip install -r requirements.txt
+   Make sure you have Python 3.8+ installed. Install required packages:<br/>
+   pip install -r requirements.txt<br/>
    My advice: install pytorch from https://pytorch.org/get-started/locally/ for enabling GPU
 
 2. **Prepare the dataset**
-    Place your raw data in the data/ directory (works with original or datasets_tensor)
-    Skip to training or run:
+    Place your raw data in the data/ directory (works with original or datasets_tensor)<br/>
+    Skip to training or run:<br/>
     python create_dataset.py
 
 3. **Train the model**
-    Train model with:
-    python train_model.py
+    Train model with:<br/>
+    python train_model.py<br/>
     Or place CPU or GPU model in the model/ directory and skip to predictions
 
 4. **Make predictions**
