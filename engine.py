@@ -1,6 +1,33 @@
 """
-Contains functions for training and testing a PyTorch model.
+engine.py
+This module provides core training and evaluation routines for the VGG-8 model, 
+specifically tailored for classification tasks in the DroneSearch project.
+Part of this code has been implemented from: https://www.learnpytorch.io/05_pytorch_going_modular/
+
+--------------------------------------------------------------------------------
+Functions:
+- train_step(model, dataloader, loss_fn, optimizer, device): 
+    Executes a single training epoch, updating model weights and tracking loss/accuracy.
+
+- test_step(model, dataloader, loss_fn, device): 
+    Evaluates the model on a test set, reporting loss, accuracy, and spatially approximate accuracy.
+
+- train(model, train_dataloader, test_dataloader, optimizer, loss_fn, epochs, device, transform): 
+    Executes the full training loop across multiple epochs, and manages checkpointing.
+
+- approximate_accuracy(y_true, y_predicted, height, distance): 
+    Computes accuracy allowing for spatial tolerance, useful for segmentation/localization tasks.
+
+--------------------------------------------------------------------------------
+Dependencies:
+- torch, tqdm, typing, logging
+- Custom modules: utils
+
+--------------------------------------------------------------------------------
+Usage:
+- Import this module in training scripts to leverage standardized training and evaluation routines.
 """
+
 import torch
 import utils
 from tqdm.auto import tqdm

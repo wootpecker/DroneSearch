@@ -4,7 +4,7 @@ This script provides a training pipeline for PyTorch-based classification and se
 It supports multiple model architectures (VGG8, UnetS) and configurable hyperparameters for hyperparameter optimization.
 The script handles dataset loading, model selection, training, logging, and plotting of loss curves.
 Device-agnostic code ensures compatibility with both CPU and CUDA-enabled GPUs.
-Part of this code has been taken from: https://www.learnpytorch.io/05_pytorch_going_modular/
+Part of this code has been implemented from: https://www.learnpytorch.io/05_pytorch_going_modular/
 
 -----------------------------
 Hyperparameters:
@@ -20,7 +20,7 @@ Training Parameters:
 - TRAIN_MODEL (int): Index of the model to train (0 for VGG-8, 1 for U-NetS).
 - LOGS_SAVE (bool): Whether to save or show logs during dataset initialization and processing.
 - SAVE_DATASET (bool): Whether to save the processed dataset.
-- RESET_TRAINING (bool): Whether to reset training to start from scratch.
+- RESET_TRAINING (bool): Whether to reset training to start from scratch (deletes models).
 - LOAD_SEED (int): Random seed for loading the dataset.
 - TRAIN_SEED (int): Random seed for training.
 - TEST_SEED (int): Random seed for testing.

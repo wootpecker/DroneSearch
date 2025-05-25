@@ -1,18 +1,95 @@
 """
-Contains various utility functions for PyTorch model training and saving.
+utils.py
+
+This module provides utility functions to support PyTorch-based model training, evaluation, and reproducibility.
+It includes helpers for dataset saving/loading, model checkpointing, random state saving/loading, plotting, and training reset.
+Part of this code has been implemented from: https://www.learnpytorch.io/05_pytorch_going_modular/
+
+-----------------------------
+Constants:
+- MODEL_TYPES: List of supported model architectures.
+- device: Target device for computations (CPU or CUDA).
+
+-----------------------------
+Functions:
+- main():
+    Used for testing.
+
+- seed_generator(SEED)
+  Sets seeds for Python, NumPy, and PyTorch random number generators for reproducibility.
+
+- save_dataset(dataset_GDM, dataset_GSL, dataset, augmented):
+  Saves PyTorch tensor datasets (gas distribution map and gas source location) to disk, supporting both original and augmented datasets.
+
+- load_dataset(dataset_name, augmented):
+  Loads PyTorch tensor datasets from disk, supporting both original and augmented datasets.
+
+- plot_image(image, title):
+  Plots a single image tensor using matplotlib.
+
+- save_image(image, index, title):
+  Saves a single image tensor as a PDF file.
+
+- plot_more_images(images, title, save):
+  Plots multiple image tensors in a grid, with optional saving as a PDF.
+
+- save_model(model, model_type, epoch, device, transform):
+  Saves a PyTorch model's state_dict to an organized directory structure, supporting original and transformed data.
+
+- load_model(model, model_type, device, transform):
+  Loads a PyTorch model's state_dict from a checkpoint, returning the model and the number of epochs trained.
+
+- save_random(model_type, epoch, device):
+  Saves the random state (PyTorch, NumPy, Python) to disk for reproducibility.
+
+- load_random(model_type, epoch, device):
+  Loads and restores the random state from disk for reproducibility.
+
+- plot_loss_curves(results, model_type, transform):
+  Plots and saves training/testing loss and accuracy curves from a results dictionary.
+
+- save_loss(results, model_type, device):
+  Saves a dictionary of training/testing loss and accuracy metrics to disk.
+
+- load_loss(model_type, device):
+  Loads a dictionary of training/testing loss and accuracy metrics from disk.
+
+- reset_training(model_type, transform):
+  Removes results folders for a specific model and data type (original or transformed) to allow clean restarts.
+
+- reset_all():
+  Removes results folders for all supported model types and both original and transformed data.
+
+- compare_rng_states(rng_state_dictin, rng_state_dict):
+  Compares two random state dictionaries for debugging reproducibility issues.
+
+- test_random_state_differences():
+  Utility function to compare consecutive saved random states for a model.
+
+-----------------------------
+Dependencies:
+- torch, pathlib, typing, matplotlib, numpy, random, math, os, shutil, logging
+
+-----------------------------
+Usage:
+- Import this module in your training or evaluation scripts to access utility functions for data handling, checkpointing, reproducibility, and visualization.
 """
+
+
+
 import torch
 from pathlib import Path
 from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
+import numpy
 import random
 import math
 import os
-import numpy
 import shutil
 import logging
 
-MODEL_TYPES = ["VGG8", "UnetS", "VGGVariation"]
+MODEL_TYPES = ["VGG8", "UnetS"]
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 
@@ -22,6 +99,15 @@ def main():
   pass
 
 def seed_generator(SEED=16923):                #Random Seed Generator for each function
+  """
+  Random Seed Generator for reproducibility.
+  
+  Args:
+      SEED (int): The seed value to set for random number generation. Default is 16923.
+  
+  Returns:
+      Tuple: A tuple containing the random seed, torch seed, and numpy seed.
+  """
   seed=random.seed(SEED)
   torch_seed=torch.manual_seed(SEED)
   numpy_seed = numpy.random.seed(SEED)
@@ -31,6 +117,15 @@ def seed_generator(SEED=16923):                #Random Seed Generator for each f
 
 
 def save_dataset(dataset_GDM,dataset_GSL,dataset,augmented=False):
+  """
+  Saves tensor dataset.
+  
+  Args:
+      dataset_GDM (Tensor): The gas distribution map dataset to save.
+      dataset_GSL (Tensor): The gas source location dataset to save.
+      dataset (str): The name of the seasonal dataset to save.
+      augmented (bool): If the augmented dataset should be loaded. Implementation utilizes Data Augmentation before training, due to long loading times of big augmented datasets.
+  """
   target_dir_path = Path("data")
   target_dir_path.mkdir(parents=True, exist_ok=True)
   if(augmented):
@@ -46,6 +141,16 @@ def save_dataset(dataset_GDM,dataset_GSL,dataset,augmented=False):
 
 
 def load_dataset(dataset_name, augmented=False):
+  """
+  Loads tensor dataset.
+  
+  Args:
+      dataset_name (str): The name of the seasonal dataset to load.
+      augmented (bool): If the augmented dataset should be loaded. Implementation utilizes Data Augmentation before training, due to long loading times of big augmented datasets.
+  
+  Returns:
+      Tuple: A tuple containing the gas distribution map dataset and the gas source location dataset.
+  """
   if(augmented):
     target_dir_path = Path(f"data/datasets_tensor_augmented/")
   else:
@@ -70,7 +175,6 @@ def plot_image(image, title=""):
     """
     image=image.squeeze().unsqueeze(-1)
     plt.imshow(image, cmap='viridis', origin='lower')
-
     plt.show()
 
 
@@ -80,6 +184,7 @@ def save_image(image,index, title=""):
   
   Args:
       image (Tensor): The image to save.
+      index (int): The index of the image for naming.
       title (str): The title of the plot.
   """
   title = f"{title}_{index:04d}"
@@ -101,6 +206,7 @@ def plot_more_images(images, title="", save=False):
     Args:
         images (Tensor): The images to plot.
         title (str): The title of the plot.
+        save (bool): Whether to save the plot as a PDF file.
     """
     images=images.squeeze().unsqueeze(-1)
 
@@ -125,13 +231,14 @@ def plot_more_images(images, title="", save=False):
 
 
 def save_model(model: torch.nn.Module, model_type: str, epoch=None, device="cuda", transform=True):
-  """Saves a PyTorch model to a target directory.
+  """
+  Saves a PyTorch model to a target directory.
   Args:
-  model: A target PyTorch model to save.
-  target_dir: A directory for saving the model to.
-  model_name: A filename for the saved model. FileEnding pth will be added
-  Example usage:
-  save_model(model=model_0, target_dir="model", model_name="05_going_modular_tingvgg_model.pth")
+    model: A target PyTorch model to save.
+    model_type: A string indicating the type of model (e.g., "VGG8", "UnetS").
+    epoch: An integer indicating the current epoch (optional, to load during subsequent training).
+    device: A target device to compute on (e.g. "cuda" or "cpu").
+    transform: A boolean indicating if the model is trained on transformed data.
   """
   # Create target directory
   target_dir_path = Path(f"model")
@@ -160,13 +267,17 @@ def save_model(model: torch.nn.Module, model_type: str, epoch=None, device="cuda
 
 
 def load_model(model: torch.nn.Module, model_type: str, device="cuda", transform=True):
-  """Saves a PyTorch model to a target directory.
+  """
+  Loads a PyTorch model from target directory.
   Args:
-  model: A target PyTorch model to save.
-  target_dir: A directory for saving the model to.
-  model_name: A filename for the saved model. FileEnding pth will be added
-  Example usage:
-  save_model(model=model_0, target_dir="model", model_name="05_going_modular_tingvgg_model.pth")
+    model: A target PyTorch model to load.
+    model_type: A string indicating the type of model (e.g., "VGG8", "UnetS").
+    device: A target device to compute on (e.g. "cuda" or "cpu").
+    transform: A boolean indicating if the model is trained on transformed data.
+  Returns:
+    model: The loaded PyTorch model with its state_dict.
+    start: An integer indicating the number of epochs the model has been trained for.
+  
   """
   # Create target directory
   target_dir_path = Path(f"model")
@@ -205,25 +316,32 @@ def load_model(model: torch.nn.Module, model_type: str, device="cuda", transform
 
 
 def save_random(model_type: str, epoch=None, device="cuda"):
-  """Saves a PyTorch model to a target directory.
+  """
+  Saves a the random state to a target directory.
   Args:
-  model: A target PyTorch model to save.
-  target_dir: A directory for saving the model to.
-  model_name: A filename for the saved model. FileEnding pth will be added
-  Example usage:
-  save_model(model=model_0, target_dir="model", model_name="05_going_modular_tingvgg_model.pth")
+    model_type: A string indicating the type of model (e.g., "VGG8", "UnetS").
+    epoch: An integer indicating the current epoch (optional, to load during subsequent training).
+    device: A target device to compute on (e.g. "cuda" or "cpu").
   """
   # Create target directory
   target_dir_path = Path(f"data/random_state")
   target_dir_path.mkdir(parents=True, exist_ok=True)
   target_dir_path = Path(f"data/random_state/{model_type}")
   target_dir_path.mkdir(parents=True, exist_ok=True)
-  rng_state_dict = {
-  'cpu_rng_state': torch.get_rng_state(),
-  'gpu_rng_state': torch.cuda.get_rng_state(),
-  'numpy_rng_state': numpy.random.get_state(),  
-  'py_rng_state': random.getstate()
-  }
+  # Create random state dictionary
+  if device == "cuda":
+    rng_state_dict = {
+      'cpu_rng_state': torch.get_rng_state(),
+      'gpu_rng_state': torch.cuda.get_rng_state(),
+      'numpy_rng_state': numpy.random.get_state(),  
+      'py_rng_state': random.getstate()
+    }
+  else:
+    rng_state_dict = {
+      'cpu_rng_state': torch.get_rng_state(),
+      'numpy_rng_state': numpy.random.get_state(),  
+      'py_rng_state': random.getstate()
+    }
 
   # Create model save path
   save_format=".ckpt"
@@ -238,13 +356,14 @@ def save_random(model_type: str, epoch=None, device="cuda"):
 
 
 def load_random(model_type: str, epoch=None, device="cuda"):
-  """Saves a PyTorch model to a target directory.
+  """
+  Loads the last random state from target directory.
   Args:
-  model: A target PyTorch model to save.
-  target_dir: A directory for saving the model to.
-  model_name: A filename for the saved model. FileEnding pth will be added
-  Example usage:
-  save_model(model=model_0, target_dir="model", model_name="05_going_modular_tingvgg_model.pth")
+    model_type: A string indicating the type of model (e.g., "VGG8", "UnetS").
+    epoch: An integer indicating the current epoch (optional, to load during subsequent training).
+    device: A target device to compute on (e.g. "cuda" or "cpu").
+  Returns:
+    start: An integer indicating the number of epochs the model has been trained for.
   """
   # Create target directory
   target_dir_path = Path(f"data/random_state")
@@ -265,7 +384,8 @@ def load_random(model_type: str, epoch=None, device="cuda"):
 
   rng_state_dict=torch.load(f=model_load_path)
   torch.set_rng_state(rng_state_dict['cpu_rng_state'])
-  torch.cuda.set_rng_state(rng_state_dict['gpu_rng_state'])
+  if device == "cuda":
+    torch.cuda.set_rng_state(rng_state_dict['gpu_rng_state'])
   numpy.random.set_state(rng_state_dict['numpy_rng_state'])
   random.setstate(rng_state_dict['py_rng_state'])
   # Save the model state_dict()
@@ -274,61 +394,67 @@ def load_random(model_type: str, epoch=None, device="cuda"):
 
     
 def plot_loss_curves(results: Dict[str, List[float]], model_type=MODEL_TYPES[0], transform=True):
-    """Plots training curves of a results dictionary.
+  """
+  Plots training curves of a results dictionary.
+  Args:
+    results (dict): dictionary containing list of values, e.g.
+        {"train_loss": [...],
+         "train_acc": [...],
+         "test_loss": [...],
+         "test_acc": [...]}
+    model_type (str): type of model used for training, e.g. "VGG8" or "UnetS".
+    transform (bool): whether the model was trained on transformed data or not.
+  """
 
-    Args:
-        results (dict): dictionary containing list of values, e.g.
-            {"train_loss": [...],
-             "train_acc": [...],
-             "test_loss": [...],
-             "test_acc": [...]}
-    """
-
-    # Get the loss values of the results dictionary (training and test)
-    loss = results['train_loss']
-    test_loss = results['test_loss']
-
-    # Get the accuracy values of the results dictionary (training and test)
-    accuracy = results['train_acc']
-    test_accuracy = results['test_acc']
-
-    # Figure out how many epochs there were
-    epochs = range(len(results['train_loss']))
-
-    # Setup a plot 
-    plt.figure(figsize=(11, 5))
-
-    # Plot loss
-    plt.subplot(1, 2, 1)
-    plt.plot(epochs, loss, label='Training Set')
-    plt.plot(epochs, test_loss, label='Testing Set')
-    plt.ylabel('Loss')
-    plt.xlabel('Epochs')
-    plt.legend()
-
-    # Plot accuracy
-    plt.subplot(1, 2, 2)
-    plt.plot(epochs, accuracy, label='Training Set')
-    plt.plot(epochs, test_accuracy, label='Testing Set')
-    plt.ylabel('Accuracy')
-    plt.xlabel('Epochs')
-    plt.legend()
-    target_dir_path = Path(f"results/loss_curve")
-    target_dir_path.mkdir(parents=True, exist_ok=True)
-
-    save_format=".pdf"
-    transform_str="on_original_data"
-    if transform:
-      transform_str="on_transformed_data"
-    file_name = "loss_" + model_type + "_" + transform_str + save_format
-    file_save_path = target_dir_path / file_name
-
-    plt.savefig(file_save_path)
-    plt.show()
+  # Get the loss values of the results dictionary (training and test)
+  loss = results['train_loss']
+  test_loss = results['test_loss']
+  # Get the accuracy values of the results dictionary (training and test)
+  accuracy = results['train_acc']
+  test_accuracy = results['test_acc']
+  # Figure out how many epochs there were
+  epochs = range(len(results['train_loss']))
+  # Setup a plot 
+  plt.figure(figsize=(11, 5))
+  # Plot loss
+  plt.subplot(1, 2, 1)
+  plt.plot(epochs, loss, label='Training Set')
+  plt.plot(epochs, test_loss, label='Testing Set')
+  plt.ylabel('Loss')
+  plt.xlabel('Epochs')
+  plt.legend()
+  # Plot accuracy
+  plt.subplot(1, 2, 2)
+  plt.plot(epochs, accuracy, label='Training Set')
+  plt.plot(epochs, test_accuracy, label='Testing Set')
+  plt.ylabel('Accuracy')
+  plt.xlabel('Epochs')
+  plt.legend()
+  target_dir_path = Path(f"results/loss_curve")
+  target_dir_path.mkdir(parents=True, exist_ok=True)
+  save_format=".pdf"
+  transform_str="on_original_data"
+  if transform:
+    transform_str="on_transformed_data"
+  file_name = "loss_" + model_type + "_" + transform_str + save_format
+  file_save_path = target_dir_path / file_name
+  plt.savefig(file_save_path)
+  plt.show()
 
 
 
 def save_loss(results,model_type: str, device="cuda"):
+  """
+  Saves the result dictionary to a target directory.
+  Args:
+    results: A dictionary containing training and testing loss and accuracy metrics.
+             In the form: {train_loss: [...],
+                           train_acc: [...],
+                           test_loss: [...],
+                           test_acc: [...]}
+    model_type: A string indicating the type of model (e.g., "VGG8", "UnetS").
+    device: A target device to compute on (e.g. "cuda" or "cpu").
+  """
   # Create target directory
   target_dir_path = Path(f"data/loss_curve")
   target_dir_path.mkdir(parents=True, exist_ok=True)
@@ -348,13 +474,17 @@ def save_loss(results,model_type: str, device="cuda"):
 
 
 def load_loss(model_type: str, device="cuda"):
-  """Saves a PyTorch model to a target directory.
+  """
+  Saves the result dictionary to a target directory.
   Args:
-  model: A target PyTorch model to save.
-  target_dir: A directory for saving the model to.
-  model_name: A filename for the saved model. FileEnding pth will be added
-  Example usage:
-  save_model(model=model_0, target_dir="model", model_name="05_going_modular_tingvgg_model.pth")
+    model_type: A string indicating the type of model (e.g., "VGG8", "UnetS").
+    device: A target device to compute on (e.g. "cuda" or "cpu").
+  Returns:
+   results: A dictionary containing training and testing loss and accuracy metrics.
+             In the form: {train_loss: [...],
+                           train_acc: [...],
+                           test_loss: [...],
+                           test_acc: [...]}
   """
   # Create empty results dictionary
   results = {"train_loss": [],
@@ -382,7 +512,41 @@ def load_loss(model_type: str, device="cuda"):
 
 
 
+def reset_training(model_type:str,transform=True):
+  """
+  Saves the result dictionary to a target directory.
+  Args:
+    model_type: A string indicating the type of model (e.g., "VGG8", "UnetS").
+    device: A target device to compute on (e.g. "cuda" or "cpu").
+  Returns:
+   results: A dictionary containing training and testing loss and accuracy metrics.
+             In the form: {train_loss: [...],
+                           train_acc: [...],
+                           test_loss: [...],
+                           test_acc: [...]}
+  """
+  folder_dir_path=[]
+  folder_dir_path.append(Path(f"data/random_state/{model_type}"))
+  folder_dir_path.append(Path(f"data/loss_curve/{model_type}"))
+  if transform:
+    folder_dir_path.append(Path(f"model/transform/{model_type}"))
+  else:
+    folder_dir_path.append(Path(f"model/original/{model_type}"))
+  for folder in folder_dir_path:
+    try:
+        shutil.rmtree(folder)
+        logging.info(f"[RESET] Folder '{folder}' deleted successfully.")  
+    except FileNotFoundError:
+        logging.info(f"[RESET] Folder '{folder}' does not exist.")  
+    except PermissionError:
+        logging.info(f"[RESET] Permission denied to delete '{folder}'.") 
+    except Exception as e:   
+        logging.info(f"[RESET] An error occurred: {e}.") 
 
+def reset_all():
+  for model in MODEL_TYPES:
+    reset_training(model, transform=True)
+    reset_training(model, transform=False)
 
 
 
@@ -451,29 +615,7 @@ def test_random_state_differences():
     compare_rng_states(state1,state2)
     print("--------------------------------")
 
-def reset_training(model_type:str,transform=True):
-  folder_dir_path=[]
-  folder_dir_path.append(Path(f"data/random_state/{model_type}"))
-  folder_dir_path.append(Path(f"data/loss_curve/{model_type}"))
-  if transform:
-    folder_dir_path.append(Path(f"model/transform/{model_type}"))
-  else:
-    folder_dir_path.append(Path(f"model/original/{model_type}"))
-  for folder in folder_dir_path:
-    try:
-        shutil.rmtree(folder)
-        logging.info(f"[RESET] Folder '{folder}' deleted successfully.")  
-    except FileNotFoundError:
-        logging.info(f"[RESET] Folder '{folder}' does not exist.")  
-    except PermissionError:
-        logging.info(f"[RESET] Permission denied to delete '{folder}'.") 
-    except Exception as e:   
-        logging.info(f"[RESET] An error occurred: {e}.") 
 
-def reset_all():
-  for model in MODEL_TYPES:
-    reset_training(model, transform=True)
-    reset_training(model, transform=False)
 
 
 
