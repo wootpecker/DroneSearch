@@ -19,26 +19,26 @@ The repository includes scripts for data preprocessing, model building, training
 
 ## Directory Structure
 
-- `data/` - Raw and processed datasets, add files from https://tubcloud.tu-berlin.de/s/yN3GjMwsJ8QRSom
+- `data/` - Raw and processed datasets, create and add files from https://tubcloud.tu-berlin.de/s/yN3GjMwsJ8QRSom
 - `helper/` - Helper scripts for creating dataset
 - `logs/` - Training and evaluation logs
-- `model/` - Saved models and checkpoints
+- `model/` - Saved models and checkpoints, create and add files from https://tubcloud.tu-berlin.de/s/yN3GjMwsJ8QRSom
 - `plots/` - Scripts for plots of data augmentation visualization
 - `results/` - Prediction results and evaluation metrics
 
 ## Getting Started
 
-1. **Install dependencies**  <br/>
+1. **Install dependencies**
    Make sure you have Python 3.8+ installed. Install required packages:<br/>
    pip install -r requirements.txt<br/>
    My advice: install pytorch from https://pytorch.org/get-started/locally/ for enabling GPU
 
-2. **Prepare the dataset**<br/>
+2. **Prepare the dataset**
     Place your raw data in the DroneSearch/data directory (both original and datasets_tensor)<br/>
     Skip to training or run:<br/>
     python create_dataset.py
 
-3. **Train the model**<br/>
+3. **Train the model**
     Train model with:<br/>
     python train_model.py<br/>
     Alternatively, place one or more CPU or GPU models into the DroneSearch/model directory (while retaining the folder structure) to bypass the training phase and proceed to make predictions
