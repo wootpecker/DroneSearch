@@ -127,9 +127,6 @@ def load_reshape_dataset(model_type=MODELS[0],transform=True, load=True, train_G
     classes=1
     common_transform = COMMON_TRANSFORM
     x_transform= X_TRANSFORM#data_transformations.RandomTransform()]
-    #common_transform = [transforms.RandomHorizontalFlip(p=1), transforms.RandomVerticalFlip(p=1)]
-    #x_transform= None
-    #common_transform = [data_transformations.RotationTransform(rotation_angle=90)]
     if not transform:
         common_transform = None
         x_transform= None

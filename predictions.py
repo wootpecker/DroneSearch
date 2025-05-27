@@ -18,6 +18,7 @@ Testing Parameters:
 - TEST_SEED (int): Random seed for reproducibility in testing.
 - PLOT_1_MODEL (bool): If True, only one model is evaluated.
 - PLOT_1_MODEL_TYPE (int): Model to evaluate if PLOT_1_MODEL is True, 0 for VGG8, 1 for UnetS.
+- TESTING_MODEL(list) : Empty List to store models to test
 
 Training Parameters:
 - Identical to train_model.py
@@ -110,27 +111,30 @@ HYPER_PARAMETERS = train_model.HYPER_PARAMETERS
 TRAINING_PARAMETERS = train_model.TRAINING_PARAMETERS
 
 TESTING_PARAMETERS = {              
-               "TRANSFORMED_DATASET": False,              # Whether to use the transformed dataset for evaluation
-               "TRANSFORMED_MODEL": True,                 # Wheter to load the transformed or original model              
+               "TRANSFORMED_DATASET": True,               # Whether to use the transformed dataset for evaluation
+               "TRANSFORMED_MODEL": True,                 # Wheter to load the transformed or original model (no need to change)          
                "MULTIPLE_PLOTS": True,                    # If True, multiple samples are plotted for each model, otherwise only one sample is plotted 
                "PLOT_SETTINGS" : ["models","transform"],  # Plot Model Comparison or Transform Comparison
                "TEST_PLOT" : 0,                           # 0: Plot Models Comparison, 1: Plot Transform Comparison
                "PLOT_BA": True,                           # If True, specific samples used for images are plotted        
                "TEST_SEED": 1009,                         # Random seed for reproducibility in testing
-               "PLOT_1_MODEL": True,                     # If True, only one model is plotted
-               "PLOT_1_MODEL_TYPE": 1,                    # Model to plot if PLOT_1_MODEL is True, 0: VGG8, 1: UnetS
+               "PLOT_1_MODEL": False,                     # If True, only one model is plotted
+               "PLOT_1_MODEL_TYPE": 0,                    # Model to plot if PLOT_1_MODEL is True, 0: VGG8, 1: UnetS
+               "TESTING_MODEL" : []
+               
   }
 
 
 
 if TESTING_PARAMETERS['PLOT_1_MODEL']:
-    TRAINING_PARAMETERS['MODEL_TYPES']= [TRAINING_PARAMETERS['MODEL_TYPES'][TESTING_PARAMETERS['PLOT_1_MODEL_TYPE']]]
+    TESTING_PARAMETERS['TESTING_MODEL']= [TRAINING_PARAMETERS['MODEL_TYPES'][TESTING_PARAMETERS['PLOT_1_MODEL_TYPE']]]
+else:
+    TESTING_PARAMETERS['TESTING_MODEL']=TRAINING_PARAMETERS['MODEL_TYPES']
 
 if TESTING_PARAMETERS['PLOT_BA']:
     HYPER_PARAMETERS['AMOUNT_SAMPLES'] = 1
     TRAINING_PARAMETERS['TEST_SEED'] = 16923
-else:
-    HYPER_PARAMETERS['AMOUNT_SAMPLES'] = 16
+
 
 
 def main():
@@ -145,8 +149,9 @@ def main():
 
 def plot_models():
     logging.info(f"Plotting Models")
+    logging.info(f"With Models: {TESTING_PARAMETERS['TESTING_MODEL']}")
     result_dic=[]
-    for model_type in TRAINING_PARAMETERS['MODEL_TYPES']:
+    for model_type in TESTING_PARAMETERS['TESTING_MODEL']:
         accuracy_results=do_predictions(model_type=model_type, multiple_plots=TESTING_PARAMETERS['MULTIPLE_PLOTS'])
         for accuracy_type, accuracy_values in accuracy_results.items():
             logging.info(f"[ACCURACY] {accuracy_type}: {accuracy_values}")
@@ -169,7 +174,6 @@ def plot_model_accuracies(result_dic):
     target_dir_path.mkdir(parents=True, exist_ok=True)
 
     plt.figure(figsize=(11, 5))
-
     accuracy_amount =  range(1,len(result_dic[0]['approximate_accuracy'])+1)
     for x in range(len(result_dic)):
         model=result_dic[x]
@@ -194,6 +198,7 @@ def plot_model_accuracies(result_dic):
     plt.legend(loc='best', fontsize=14)
     plt.tight_layout()
     plt.savefig(target_dir_path / f'topn_accuracy_model_comparison{figname}.pdf')
+    plt.show()
 
 
 
@@ -215,9 +220,10 @@ def plot_model_accuracies(result_dic):
 
 def plot_transform():
     logging.info(f"Plotting Transform Comparison")
-    for model_type in TRAINING_PARAMETERS['MODEL_TYPES']:
+    logging.info(f"With Models: {TESTING_PARAMETERS['TESTING_MODEL']}")
+    for model_type in TESTING_PARAMETERS['TESTING_MODEL']:
         result_dic=[]
-        global TESTING_PARAMETERS
+        #global TESTING_PARAMETERS
         TESTING_PARAMETERS['TRANSFORMED_MODEL']=True
         for i in range(0,2):        
             accuracy_results=do_predictions(model_type=model_type, multiple_plots=TESTING_PARAMETERS['MULTIPLE_PLOTS'])
@@ -314,7 +320,7 @@ def do_predictions(model_type= "VGG", multiple_plots=False):
     Plot of confusion matrix
     """
     utils.seed_generator(SEED=TRAINING_PARAMETERS['LOAD_SEED'])
-    train_dataloader,test_dataloader,classes = model_dataloader.create_dataloader(model_type=model_type, batch_size=HYPER_PARAMETERS['BATCH_SIZE'], transform=HYPER_PARAMETERS['TRANSFORM'], amount_samples=HYPER_PARAMETERS['AMOUNT_SAMPLES'], window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
+    train_dataloader,test_dataloader,classes = model_dataloader.create_dataloader(model_type=model_type, batch_size=HYPER_PARAMETERS['BATCH_SIZE'], transform=TESTING_PARAMETERS['TRANSFORMED_DATASET'], amount_samples=HYPER_PARAMETERS['AMOUNT_SAMPLES'], window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
     model = model_builder.choose_model(model_type=model_type,output_shape=classes,device=device,window_size=HYPER_PARAMETERS['WINDOW_SIZE'])
     model,_=utils.load_model(model= model, model_type=model_type, device=device, transform=TESTING_PARAMETERS['TRANSFORMED_MODEL'])
     
