@@ -85,8 +85,8 @@ Dependencies:
 
 -----------------------------
 Usage:
-This module is intended to be run as a script or imported as a utility in larger projects which involves model evaluation and visualization. 
-It is especially suited for research where detailed analysis and comparison of model performance is required.
+Run this as a script or import it as a utility in larger projects, with:
+    python predictions.py
 """
 import torch
 import matplotlib.pyplot as plt

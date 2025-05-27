@@ -24,7 +24,6 @@ Usage:
 import logging
 import os
 from pathlib import Path
-#from logger import logging_config
  
 
 def main():
