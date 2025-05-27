@@ -1,8 +1,8 @@
 data/
 old/
 model/
-/logs/*
 !logs/logger.py
+logs/*
 __pycache__/
 pycache/*
 helper/pycache/*
