@@ -30,7 +30,7 @@ Functions:
     Converts the X transformation list into a string representation for logging.  
 
 - plot_for_BA(model_type):
-    Visualization function for inspecting the effect of augmentations on a sample from the dataset.      
+    Visualization function for inspecting the effect of data transformation on a sample from the dataset.      
 
 -----------------------------
 Classes:

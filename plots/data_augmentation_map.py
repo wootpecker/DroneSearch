@@ -14,7 +14,7 @@ Functions:
 - main(): Configures logging and triggers the plotting of data augmentation map.
 
 - plot_original_locations(): 
-    Plots and saves the gas source locations of the dataset provided by Nicolas Winkler on a blank grid.
+    Plots and saves the gas source locations of the dataset provided by N.Winkler.
 
 - plot_augmented(): 
     Plots and saves the augmented sample regions, visualizing the data augmentation.

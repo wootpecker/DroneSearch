@@ -25,7 +25,7 @@ Dependencies:
 
 -----------------------------
 Usage:
-- Import this module in training scripts to leverage standardized training and evaluation routines.
+- Import this module in training scripts to create standardized training and evaluation routines.
 """
 
 

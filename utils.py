@@ -2,7 +2,7 @@
 utils.py
 
 This module provides utility functions to support PyTorch-based model training, evaluation, and reproducibility.
-It includes helpers for dataset saving/loading, model checkpointing, random state saving/loading, plotting, and training reset.
+It includes helpers for dataset saving/loading, model checkpointing, random state saving/loading, plotting, and resetting training.
 Part of this code has been implemented from: https://www.learnpytorch.io/05_pytorch_going_modular/
 
 -----------------------------

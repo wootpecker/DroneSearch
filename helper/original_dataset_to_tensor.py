@@ -1,6 +1,6 @@
 """
 original_dataset_to_tensor.py
-This script processes raw text-based dataset of Nicolas Winkler, converting them into normalized PyTorch tensors for further training of machine learning models. 
+This script processes raw text-based dataset of N. Winkler, converting them into normalized PyTorch tensors for further training of machine learning models. 
 It is designed to handle multiple directories, which each representing a different season, apply optional logarithmic normalization, and identifies key features such as the most frequent maximum value positions in the data.
 
 -----------------------------
@@ -11,7 +11,7 @@ Testing Parameters:
 - PLUME_THRESHOLD (int): The threshold value for the plume generation in seconds, used to start measuring when plumes are fully developed.
 
 Constants:
-- SOURCE_DIR: Directory containing dataset of Nicolas Winkler.
+- SOURCE_DIR: Directory containing dataset of N. Winkler.
 
 -----------------------------
 Functions:
@@ -38,7 +38,7 @@ Dependencies:
 
 -----------------------------
 Usage:
-- Run this script as a helper module to generate a tensor file for the dataset of Nicolas Winkler. 
+- Run this script as a helper module to generate a tensor file for the dataset of N. Winkler. 
 - Run this script directly to process all datasets in the specified SOURCE_DIR.
 
 This module assumes the existence of a 'data/original/' directory containing simulation datasets.
